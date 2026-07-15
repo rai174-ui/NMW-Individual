@@ -1,4 +1,4 @@
-import { useGetMember } from "@workspace/api-client-react";
+import { useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { motion } from "framer-motion";
 import { LogOut, Info, HeartPulse, Activity } from "lucide-react";
@@ -8,6 +8,8 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { apiFetch } from "@/lib/api-base";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from "recharts";
 import { RecordHealthDrawer } from "@/components/record-health-drawer";
+import { TargetsDrawer } from "@/components/targets-drawer";
+import { useQueryClient } from "@tanstack/react-query";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -17,9 +19,11 @@ function safeFormat(value: string | null | undefined, fmt: string, fallback = "-
 
 export function Profile() {
   const { memberId: MEMBER_ID, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [chartMetric, setChartMetric] = useState<"weight_kg" | "body_fat_pct">("weight_kg");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [targetsDrawerOpen, setTargetsDrawerOpen] = useState(false);
 
   const fetchRecords = useCallback(() => {
     if (MEMBER_ID) {
@@ -35,9 +39,14 @@ export function Profile() {
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
+
   const { data: member } = useGetMember(MEMBER_ID!, {
     query: { enabled: !!MEMBER_ID }
   });
+
+  const handleTargetsSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: getGetMemberQueryKey(MEMBER_ID!) });
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -121,6 +130,40 @@ export function Profile() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Active
             </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Targets Section */}
+      <section>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" />
+            My Daily Targets
+          </h2>
+          <button 
+            onClick={() => setTargetsDrawerOpen(true)}
+            className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-lg active:scale-95 transition-transform"
+          >
+            Edit Targets
+          </button>
+        </div>
+        <div className="bg-card border rounded-2xl p-4 shadow-sm grid grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Calories</span>
+            <span className="text-base font-bold">{member?.daily_kcal || "--"} <span className="text-xs font-normal text-muted-foreground">kcal</span></span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Protein</span>
+            <span className="text-base font-bold">{member?.target_protein_g || "--"} <span className="text-xs font-normal text-muted-foreground">g</span></span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Fiber</span>
+            <span className="text-base font-bold">{member?.target_fiber_g || "--"} <span className="text-xs font-normal text-muted-foreground">g</span></span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Water</span>
+            <span className="text-base font-bold">{member?.target_water_ml || "--"} <span className="text-xs font-normal text-muted-foreground">ml</span></span>
           </div>
         </div>
       </section>
@@ -233,6 +276,13 @@ export function Profile() {
         open={drawerOpen} 
         onOpenChange={setDrawerOpen} 
         onSuccess={fetchRecords} 
+      />
+
+      <TargetsDrawer
+        open={targetsDrawerOpen}
+        onOpenChange={setTargetsDrawerOpen}
+        member={member}
+        onSuccess={handleTargetsSuccess}
       />
     </motion.div>
   );

@@ -16,8 +16,30 @@ router.param("id", (req, res, next, id) => {
 
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
-  const { rows } = await pool.query("SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active FROM members WHERE id = $1", [Number(req.params.id)]);
+  const { rows } = await pool.query(
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml FROM members WHERE id = $1", 
+    [Number(req.params.id)]
+  );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
+  res.json(rows[0]);
+});
+
+// PUT /api/members/:id/targets
+router.put("/members/:id/targets", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { daily_kcal, target_protein_g, target_fiber_g, target_water_ml } = req.body;
+  const { rows } = await pool.query(
+    `UPDATE members 
+     SET daily_kcal = $1, target_protein_g = $2, target_fiber_g = $3, target_water_ml = $4 
+     WHERE id = $5 RETURNING id, daily_kcal, target_protein_g, target_fiber_g, target_water_ml`,
+    [
+      daily_kcal ?? null, 
+      target_protein_g ?? null, 
+      target_fiber_g ?? null, 
+      target_water_ml ?? null, 
+      memberId
+    ]
+  );
   res.json(rows[0]);
 });
 
@@ -172,6 +194,40 @@ router.delete("/members/:id/consumption/:logId", async (req, res) => {
     return;
   }
   res.status(204).send();
+});
+
+// GET /api/members/:id/water
+router.get("/members/:id/water", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const date = req.query.date as string | undefined;
+  if (date) {
+    const { rows } = await pool.query(
+      "SELECT * FROM water_logs WHERE member_id = $1 AND DATE(logged_at AT TIME ZONE 'Asia/Kolkata') = $2 ORDER BY logged_at ASC",
+      [memberId, date]
+    );
+    res.json(rows);
+  } else {
+    const { rows } = await pool.query(
+      "SELECT * FROM water_logs WHERE member_id = $1 ORDER BY logged_at DESC LIMIT 100",
+      [memberId]
+    );
+    res.json(rows);
+  }
+});
+
+// POST /api/members/:id/water
+router.post("/members/:id/water", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { amount_ml } = req.body;
+  if (!amount_ml || isNaN(amount_ml)) {
+    res.status(400).json({ error: "amount_ml is required" });
+    return;
+  }
+  const { rows } = await pool.query(
+    "INSERT INTO water_logs (member_id, amount_ml, logged_at) VALUES ($1, $2, NOW()) RETURNING *",
+    [memberId, amount_ml]
+  );
+  res.status(201).json(rows[0]);
 });
 
 export default router;

@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/lib/api-base";
 import { RecordHealthDrawer } from "@/components/record-health-drawer";
+import { Droplet } from "lucide-react";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -85,7 +86,9 @@ export function Dashboard() {
   const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId } });
 
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
+  const [waterLogs, setWaterLogs] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [addingWater, setAddingWater] = useState(false);
 
   const fetchRecords = useCallback(() => {
     if (memberId) {
@@ -93,6 +96,13 @@ export function Dashboard() {
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setHealthRecords(data);
+        })
+        .catch(console.error);
+        
+      apiFetch(`/members/${memberId}/water?date=${TODAY}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setWaterLogs(data);
         })
         .catch(console.error);
     }
@@ -108,6 +118,25 @@ export function Dashboard() {
     const d = new Date(r.recorded_at);
     return d.toLocaleDateString("en-CA") === TODAY;
   });
+  
+  const totalWater = waterLogs.reduce((acc, log) => acc + log.amount_ml, 0);
+
+  const handleAddWater = async (amount: number) => {
+    if (!memberId) return;
+    setAddingWater(true);
+    try {
+      await apiFetch(`/members/${memberId}/water`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount_ml: amount })
+      });
+      fetchRecords(); // re-fetch water logs
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAddingWater(false);
+    }
+  };
 
   const handleLogout = () => {
     queryClient.clear();
@@ -153,7 +182,7 @@ export function Dashboard() {
           <div className="flex items-center justify-center gap-6 mb-6">
             <ProgressRing
               value={macros.total_kcal}
-              max={2000} // Example hardcoded goal, could be fetched from member profile
+              max={member?.daily_kcal || 2000}
               label="CALORIES"
               color="hsl(var(--primary))"
               size={140}
@@ -162,10 +191,46 @@ export function Dashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <MacroPill label="Protein" value={macros.total_protein_g} max={100} colorClass="bg-rose-500" />
+            <MacroPill label="Protein" value={macros.total_protein_g} max={member?.target_protein_g || 100} colorClass="bg-rose-500" />
             <MacroPill label="Carbs" value={macros.total_carbs_g} max={250} colorClass="bg-amber-500" />
             <MacroPill label="Fat" value={macros.total_fat_g} max={65} colorClass="bg-sky-500" />
-            <MacroPill label="Fiber" value={macros.total_fiber_g} max={30} colorClass="bg-emerald-500" />
+            <MacroPill label="Fiber" value={macros.total_fiber_g} max={member?.target_fiber_g || 30} colorClass="bg-emerald-500" />
+          </div>
+        </section>
+
+        {/* Hydration Tracker */}
+        <section className="bg-card border shadow-sm rounded-2xl p-5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <Droplet className="w-4 h-4 text-sky-500 fill-sky-500/20" />
+              Hydration
+            </h2>
+            <span className="text-xs font-medium text-muted-foreground">
+              {totalWater} / {member?.target_water_ml || 2000} ml
+            </span>
+          </div>
+          
+          <div className="h-3 w-full bg-muted rounded-full overflow-hidden mb-5">
+            <motion.div
+              className="h-full bg-sky-500 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min((totalWater / (member?.target_water_ml || 2000)) * 100, 100)}%` }}
+              transition={{ duration: 1 }}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            {[250, 500].map(amt => (
+              <button
+                key={amt}
+                onClick={() => handleAddWater(amt)}
+                disabled={addingWater}
+                className="flex-1 py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 font-medium rounded-xl text-sm transition-colors flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {amt}ml
+              </button>
+            ))}
           </div>
         </section>
 
