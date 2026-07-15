@@ -51,6 +51,9 @@ app.use(
       // Allow exact matches from our list
       if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
 
+      // Allow any railway subdomain
+      if (origin.endsWith(".up.railway.app")) return cb(null, true);
+
       // Allow local development ports (e.g., localhost:5173)
       if (
         origin.startsWith("http://localhost:") ||
