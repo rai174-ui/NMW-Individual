@@ -1,4 +1,4 @@
-﻿import { useGetMember } from "@workspace/api-client-react";
+import { useGetMember } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { motion } from "framer-motion";
 import { LogOut, Info, HeartPulse, Activity } from "lucide-react";
@@ -23,7 +23,7 @@ export function Profile() {
 
   useEffect(() => {
     if (MEMBER_ID) {
-      apiFetch(/members/\/health-records)
+      apiFetch(`/members/${MEMBER_ID}/health-records`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setHealthRecords(data);
