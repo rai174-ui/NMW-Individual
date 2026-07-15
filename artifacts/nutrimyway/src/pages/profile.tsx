@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { LogOut, Info, HeartPulse, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { apiFetch } from "@/lib/api-base";
+import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from "recharts";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -16,6 +17,7 @@ function safeFormat(value: string | null | undefined, fmt: string, fallback = "-
 export function Profile() {
   const { memberId: MEMBER_ID, logout } = useAuth();
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
+  const [chartMetric, setChartMetric] = useState<"weight_kg" | "body_fat_pct">("weight_kg");
 
   const { data: member } = useGetMember(MEMBER_ID!, {
     query: { enabled: !!MEMBER_ID }
@@ -35,6 +37,30 @@ export function Profile() {
   const getInitials = (name?: string) => {
     if (!name) return "U";
     return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  };
+
+  const chartData = useMemo(() => {
+    return [...healthRecords]
+      .filter(r => r[chartMetric] != null)
+      .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime())
+      .map(r => ({
+        ...r,
+        formattedDate: safeFormat(r.recorded_at, "MMM d"),
+      }));
+  }, [healthRecords, chartMetric]);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border shadow-sm rounded-lg p-3 text-sm">
+          <p className="font-medium mb-1">{label}</p>
+          <p className="text-primary font-bold">
+            {payload[0].value} {chartMetric === "weight_kg" ? "kg" : "%"}
+          </p>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -104,6 +130,68 @@ export function Profile() {
           <Link href="/log" className="text-xs text-primary font-medium">Add Log</Link>
         </div>
         
+        {healthRecords.length > 0 && (
+          <div className="mb-6">
+            <div className="flex bg-muted/40 p-1 rounded-xl mb-4 w-fit">
+              <button
+                onClick={() => setChartMetric("weight_kg")}
+                className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-colors ${chartMetric === "weight_kg" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Weight
+              </button>
+              <button
+                onClick={() => setChartMetric("body_fat_pct")}
+                className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-colors ${chartMetric === "body_fat_pct" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Body Fat
+              </button>
+            </div>
+            
+            {chartData.length > 1 ? (
+              <div className="h-48 w-full -ml-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                    <XAxis 
+                      dataKey="formattedDate" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} 
+                      dy={10}
+                    />
+                    <YAxis 
+                      domain={['dataMin - 2', 'dataMax + 2']} 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} 
+                    />
+                    <RechartsTooltip content={<CustomTooltip />} />
+                    <Area 
+                      type="monotone" 
+                      dataKey={chartMetric} 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorMetric)" 
+                      animationDuration={1500}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-48 flex items-center justify-center text-sm text-muted-foreground border border-dashed rounded-xl">
+                Need at least 2 logs to show a chart.
+              </div>
+            )}
+          </div>
+        )}
+
         {!healthRecords || healthRecords.length === 0 ? (
           <div className="py-8 text-center bg-muted/30 rounded-xl border border-dashed">
             <HeartPulse className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
