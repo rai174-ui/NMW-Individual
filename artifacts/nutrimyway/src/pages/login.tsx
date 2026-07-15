@@ -71,10 +71,13 @@ export function Login() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/40">
       <Card className="w-full max-w-md card-shadow-none sm:shadow-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+          <div className="flex justify-center mb-2">
+            <img src="/logo.png" alt="NutriMyWay Logo" className="h-16 w-auto drop-shadow-sm" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">
             {mode === "login" ? "Log in" : mode === "register" ? "Create Account" : "Reset Password"}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-center">
             {mode === "login" && "Enter your email and password to access your account."}
             {mode === "register" && "Sign up to start tracking your health journey."}
             {mode === "reset" && !otpSent && "Enter your email to receive a reset code."}
