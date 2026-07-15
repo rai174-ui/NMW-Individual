@@ -4,7 +4,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { apiRequest } from "@workspace/api-client-react";
+import { apiFetch } from "@/lib/api-base";
+
+async function apiRequest(method: string, path: string, body?: any) {
+  const cleanPath = path.startsWith('/api') ? path.slice(4) : path;
+  return await apiFetch(cleanPath, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+}
 
 export function Login() {
   const [mode, setMode] = useState<"login" | "register" | "reset">("login");
