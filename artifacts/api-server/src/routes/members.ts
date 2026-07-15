@@ -58,6 +58,31 @@ router.post("/members/:id/health-records", async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
+// PUT /api/members/:id/health-records/:recordId
+router.put("/members/:id/health-records/:recordId", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const recordId = Number(req.params.recordId);
+  const {
+    weight_kg, body_fat_pct, notes,
+  } = req.body as {
+    weight_kg?: number | null; body_fat_pct?: number | null; notes?: string | null;
+  };
+  
+  const { rowCount, rows } = await pool.query(
+    `UPDATE health_records
+     SET weight_kg = $1, body_fat_pct = $2, notes = $3
+     WHERE id = $4 AND member_id = $5
+     RETURNING *`,
+    [weight_kg ?? null, body_fat_pct ?? null, notes ?? null, recordId, memberId]
+  );
+  
+  if (rowCount === 0) {
+    res.status(404).json({ error: "Record not found" });
+    return;
+  }
+  res.json(rows[0]);
+});
+
 // GET /api/members/:id/consumption?date=YYYY-MM-DD
 router.get("/members/:id/consumption", async (req, res) => {
   const memberId = Number(req.params.id);

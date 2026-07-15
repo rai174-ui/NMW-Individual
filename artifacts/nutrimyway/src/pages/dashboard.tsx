@@ -1,10 +1,13 @@
-﻿import { useGetMember, getGetMemberQueryKey, useGetDailySummary } from "@workspace/api-client-react";
+import { useGetMember, getGetMemberQueryKey, useGetDailySummary } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
 import { Plus, LogOut, Utensils, HeartPulse, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { useEffect, useState, useCallback } from "react";
+import { apiFetch } from "@/lib/api-base";
+import { RecordHealthDrawer } from "@/components/record-health-drawer";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -80,6 +83,31 @@ export function Dashboard() {
 
   const { data: member } = useGetMember(memberId!, { query: { enabled: !!memberId } });
   const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId } });
+
+  const [healthRecords, setHealthRecords] = useState<any[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const fetchRecords = useCallback(() => {
+    if (memberId) {
+      apiFetch(`/members/${memberId}/health-records`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setHealthRecords(data);
+        })
+        .catch(console.error);
+    }
+  }, [memberId]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  // Check if there is a record for today (in local timezone)
+  const todayRecord = healthRecords.find(r => {
+    if (!r.recorded_at) return false;
+    const d = new Date(r.recorded_at);
+    return d.toLocaleDateString("en-CA") === TODAY;
+  });
 
   const handleLogout = () => {
     queryClient.clear();
@@ -165,7 +193,37 @@ export function Dashboard() {
           </div>
         </section>
 
+        {/* Today's Weight Widget */}
+        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <HeartPulse className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Today's Weight</p>
+              {todayRecord ? (
+                <p className="text-xs text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat % logged'}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">Not logged yet</p>
+              )}
+            </div>
+          </div>
+          <button 
+            onClick={() => setDrawerOpen(true)}
+            className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-sm font-medium rounded-lg transition-colors"
+          >
+            {todayRecord ? "Edit" : "Log Now"}
+          </button>
+        </section>
+
       </main>
+
+      <RecordHealthDrawer 
+        open={drawerOpen} 
+        onOpenChange={setDrawerOpen} 
+        existingRecord={todayRecord}
+        onSuccess={fetchRecords} 
+      />
     </div>
   );
 }

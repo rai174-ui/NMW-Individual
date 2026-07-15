@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { LogOut, Info, HeartPulse, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "wouter";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { apiFetch } from "@/lib/api-base";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from "recharts";
+import { RecordHealthDrawer } from "@/components/record-health-drawer";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -18,12 +19,9 @@ export function Profile() {
   const { memberId: MEMBER_ID, logout } = useAuth();
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [chartMetric, setChartMetric] = useState<"weight_kg" | "body_fat_pct">("weight_kg");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const { data: member } = useGetMember(MEMBER_ID!, {
-    query: { enabled: !!MEMBER_ID }
-  });
-
-  useEffect(() => {
+  const fetchRecords = useCallback(() => {
     if (MEMBER_ID) {
       apiFetch(`/members/${MEMBER_ID}/health-records`)
         .then(res => res.json())
@@ -33,6 +31,13 @@ export function Profile() {
         .catch(console.error);
     }
   }, [MEMBER_ID]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+  const { data: member } = useGetMember(MEMBER_ID!, {
+    query: { enabled: !!MEMBER_ID }
+  });
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -127,7 +132,12 @@ export function Profile() {
             <Activity className="w-4 h-4 text-primary" />
             Health History
           </h2>
-          <Link href="/log" className="text-xs text-primary font-medium">Add Log</Link>
+          <button 
+            onClick={() => setDrawerOpen(true)}
+            className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-lg active:scale-95 transition-transform"
+          >
+            Record My Health
+          </button>
         </div>
         
         {healthRecords.length > 0 && (
@@ -218,6 +228,12 @@ export function Profile() {
           </div>
         )}
       </section>
+
+      <RecordHealthDrawer 
+        open={drawerOpen} 
+        onOpenChange={setDrawerOpen} 
+        onSuccess={fetchRecords} 
+      />
     </motion.div>
   );
 }

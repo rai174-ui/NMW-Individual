@@ -13,5 +13,8 @@
     "cross-env": "^10.1.0",
     "prettier": "^3.8.4",
     "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
   }
 }
