@@ -18,16 +18,13 @@ pnpm run typecheck:libs
 echo "==> Building member app (served at /)"
 PORT=8080 BASE_PATH=/ pnpm --filter @workspace/nutrimyway run build
 
-echo "==> Building admin panel (served at /admin)"
-BASE_PATH=/admin pnpm --filter @workspace/nutrimyway-admin run build
 
 echo "==> Building API server"
 pnpm --filter @workspace/api-server run build
 
 echo "==> Assembling static assets into api-server/dist/public"
 rm -rf artifacts/api-server/dist/public
-mkdir -p artifacts/api-server/dist/public/admin
+mkdir -p artifacts/api-server/dist/public
 cp -r artifacts/nutrimyway/dist/public/. artifacts/api-server/dist/public/
-cp -r artifacts/nutrimyway-admin/dist/public/. artifacts/api-server/dist/public/admin/
 
 echo "==> Build complete"
