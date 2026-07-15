@@ -1,0 +1,12 @@
+name: Build and Deploy to Hostinger (disabled)
+
+# This workflow is obsolete. NutriMyWay now deploys as a single Railway
+# service (API server + both frontends) via Railway's GitHub auto-deploy,
+# not via FTP to Hostinger. See DEPLOY.md for the current deployment flow.
+#
+# Disabled rather than deleted because CI workflow file deletions require
+# git permissions not available to the agent in this workspace. If you no
+# longer need this file, delete it manually from GitHub or your local clone.
+
+on:
+  workflow_dispatch: {}

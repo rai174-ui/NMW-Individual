@@ -1,0 +1,630 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: NutriMyWay API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: members
+    description: Member operations
+  - name: bom
+    description: Bill of Materials
+  - name: pack-sizes
+    description: Pack size reference data
+  - name: storage
+    description: Object storage upload and serving endpoints
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /storage/uploads/request-url:
+    post:
+      tags: [storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadUrlRequest'
+      responses:
+        '200':
+          description: Presigned upload URL generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [storage]
+      operationId: getPublicObject
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object content streamed with correct Content-Type.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /members/{memberId}:
+    get:
+      operationId: getMember
+      tags: [members]
+      summary: Get member profile
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Member profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+
+  /members/{memberId}/centers:
+    get:
+      operationId: getMemberCenters
+      tags: [members]
+      summary: Get centers mapped to member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of centers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Center"
+
+  /members/{memberId}/health-records:
+    get:
+      operationId: getHealthRecords
+      tags: [members]
+      summary: Get all health records for member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of health records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HealthRecord"
+    post:
+      operationId: createHealthRecord
+      tags: [members]
+      summary: Add health record
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HealthRecordInput"
+      responses:
+        "201":
+          description: Health record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthRecord"
+
+  /members/{memberId}/consumption:
+    get:
+      operationId: getConsumptionLogs
+      tags: [members]
+      summary: Get consumption logs
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Date filter in YYYY-MM-DD format
+      responses:
+        "200":
+          description: List of consumption logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConsumptionLog"
+    post:
+      operationId: createConsumptionLog
+      tags: [members]
+      summary: Add consumption log entry
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsumptionLogInput"
+      responses:
+        "201":
+          description: Consumption log created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsumptionLog"
+
+  /members/{memberId}/summary:
+    get:
+      operationId: getDailySummary
+      tags: [members]
+      summary: Get daily calorie and macro totals
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Date in YYYY-MM-DD format
+      responses:
+        "200":
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailySummary"
+
+  /members/{memberId}/status:
+    get:
+      operationId: getMemberStatus
+      tags: [members]
+      summary: Get member's check-in and validity status, including expiry warnings
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Member status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberStatus"
+
+  /members/{memberId}/issuances:
+    get:
+      operationId: getMemberIssuances
+      tags: [members]
+      summary: Get pack issuance history for member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of issuances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Issuance"
+
+  /bom:
+    get:
+      operationId: getBomItems
+      tags: [bom]
+      summary: Get BOM items for a plan
+      parameters:
+        - name: plan
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of BOM items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BomItem"
+
+  /pack-sizes:
+    get:
+      operationId: getPackSizes
+      tags: [pack-sizes]
+      summary: Get all pack size reference data
+      responses:
+        "200":
+          description: List of pack sizes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PackSize"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+        membership_no:
+          type: ["string", "null"]
+          description: The human-readable membership number shown to the member
+        name:
+          type: string
+        date_of_joining:
+          type: ["string", "null"]
+        gender:
+          type: ["string", "null"]
+          description: "Member gender: male, female, or other"
+        height_cm:
+          type: ["integer", "null"]
+        daily_kcal:
+          type: ["integer", "null"]
+      required:
+        - id
+        - name
+
+    MemberStatus:
+      type: object
+      properties:
+        checkin_cap:
+          type: integer
+        checkins_used:
+          type: integer
+        checkins_remaining:
+          type: integer
+        valid_until:
+          type: ["string", "null"]
+        days_until_expiry:
+          type: ["integer", "null"]
+        is_expiring_soon:
+          type: boolean
+          description: True when validity expires within 7 days or 7 or fewer check-ins remain
+      required:
+        - checkin_cap
+        - checkins_used
+        - checkins_remaining
+        - valid_until
+        - days_until_expiry
+        - is_expiring_soon
+
+    Center:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    HealthRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        member_id:
+          type: integer
+        center_id:
+          type: ["string", "null"]
+        recorded_at:
+          type: string
+        weight_kg:
+          type: ["number", "null"]
+        body_fat_pct:
+          type: ["number", "null"]
+        visceral_fat:
+          type: ["number", "null"]
+        bmr:
+          type: ["number", "null"]
+        bmi:
+          type: ["number", "null"]
+        metabolic_age:
+          type: ["integer", "null"]
+        muscle_mass_kg:
+          type: ["number", "null"]
+        resting_hr:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - id
+        - member_id
+        - recorded_at
+
+    HealthRecordInput:
+      type: object
+      properties:
+        recorded_at:
+          type: ["string", "null"]
+          description: ISO date or date-time string; defaults to now if omitted
+        center_id:
+          type: ["string", "null"]
+        weight_kg:
+          type: ["number", "null"]
+        body_fat_pct:
+          type: ["number", "null"]
+        visceral_fat:
+          type: ["number", "null"]
+        bmr:
+          type: ["number", "null"]
+        bmi:
+          type: ["number", "null"]
+        metabolic_age:
+          type: ["integer", "null"]
+        muscle_mass_kg:
+          type: ["number", "null"]
+        resting_hr:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ConsumptionLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        member_id:
+          type: integer
+        logged_at:
+          type: string
+        meal_slot:
+          type: string
+        food_item:
+          type: string
+        quantity_g:
+          type: ["number", "null"]
+        calories_kcal:
+          type: ["number", "null"]
+        protein_g:
+          type: ["number", "null"]
+        carbs_g:
+          type: ["number", "null"]
+        fat_g:
+          type: ["number", "null"]
+        photo_url:
+          type: ["string", "null"]
+        photo_uploaded_at:
+          type: ["string", "null"]
+      required:
+        - id
+        - member_id
+        - meal_slot
+        - food_item
+
+    ConsumptionLogInput:
+      type: object
+      properties:
+        meal_slot:
+          type: string
+        food_item:
+          type: string
+        quantity_g:
+          type: ["number", "null"]
+        calories_kcal:
+          type: ["number", "null"]
+        protein_g:
+          type: ["number", "null"]
+        carbs_g:
+          type: ["number", "null"]
+        fat_g:
+          type: ["number", "null"]
+        photo_url:
+          type: ["string", "null"]
+      required:
+        - meal_slot
+        - food_item
+
+    DailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+        total_calories:
+          type: number
+        total_protein:
+          type: number
+        total_carbs:
+          type: number
+        total_fat:
+          type: number
+        target_calories:
+          type: number
+        logs_by_slot:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/ConsumptionLog"
+      required:
+        - date
+        - total_calories
+        - total_protein
+        - total_carbs
+        - total_fat
+
+    BomItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        plan_name:
+          type: ["string", "null"]
+        food_item:
+          type: string
+        quantity_g:
+          type: ["number", "null"]
+        calories_kcal:
+          type: ["number", "null"]
+        protein_g:
+          type: ["number", "null"]
+        carbs_g:
+          type: ["number", "null"]
+        fat_g:
+          type: ["number", "null"]
+      required:
+        - id
+        - food_item
+
+    PackSize:
+      type: object
+      properties:
+        id:
+          type: integer
+        item_name:
+          type: string
+        pack_label:
+          type: ["string", "null"]
+        weight_g:
+          type: ["number", "null"]
+        calories_kcal:
+          type: ["number", "null"]
+      required:
+        - id
+        - item_name
+
+    Issuance:
+      type: object
+      properties:
+        id:
+          type: integer
+        member_id:
+          type: integer
+        center_id:
+          type: ["string", "null"]
+        pack_label:
+          type: ["string", "null"]
+        issued_at:
+          type: string
+        status:
+          type: ["string", "null"]
+      required:
+        - id
+        - member_id
+        - issued_at
+
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Original file name.
+        size:
+          type: integer
+          minimum: 1
+          description: File size in bytes.
+        contentType:
+          type: string
+          minLength: 1
+          description: MIME type of the file (e.g. image/jpeg).
+
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+          description: Presigned GCS URL for PUT upload.
+        objectPath:
+          type: string
+          description: Normalized object path.
+        metadata:
+          $ref: '#/components/schemas/UploadUrlRequest'
