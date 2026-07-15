@@ -1,7 +1,7 @@
 import { useGetMember, getGetMemberQueryKey, useGetDailySummary } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
-import { Plus, LogOut, Utensils, HeartPulse, User } from "lucide-react";
+import { Plus, Minus, LogOut, Utensils, HeartPulse, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -138,6 +138,21 @@ export function Dashboard() {
     }
   };
 
+  const handleSubtractWater = async () => {
+    if (!memberId || totalWater === 0) return;
+    setAddingWater(true);
+    try {
+      await apiFetch(`/members/${memberId}/water/latest?date=${TODAY}`, {
+        method: "DELETE",
+      });
+      fetchRecords();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAddingWater(false);
+    }
+  };
+
   const handleLogout = () => {
     queryClient.clear();
     logout();
@@ -175,86 +190,76 @@ export function Dashboard() {
         <section className="bg-card border shadow-sm rounded-2xl p-5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
           
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold tracking-tight">Today's Nutrition</h2>
-          </div>
-
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <ProgressRing
-              value={macros.total_kcal}
-              max={member?.daily_kcal || 2000}
-              label="CALORIES"
-              color="hsl(var(--primary))"
-              size={140}
-              strokeWidth={10}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <MacroPill label="Protein" value={macros.total_protein_g} max={member?.target_protein_g || 100} colorClass="bg-rose-500" />
-            <MacroPill label="Carbs" value={macros.total_carbs_g} max={250} colorClass="bg-amber-500" />
-            <MacroPill label="Fat" value={macros.total_fat_g} max={65} colorClass="bg-sky-500" />
-            <MacroPill label="Fiber" value={macros.total_fiber_g} max={member?.target_fiber_g || 30} colorClass="bg-emerald-500" />
+          <div className="flex gap-4 items-center">
+            <div className="w-1/2 flex items-center justify-center">
+              <ProgressRing
+                value={macros.total_kcal}
+                max={member?.daily_kcal || 2000}
+                label="KCAL"
+                color="hsl(var(--primary))"
+                size={140}
+                strokeWidth={10}
+              />
+            </div>
+            <div className="w-1/2 flex flex-col justify-center gap-3 pr-2">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground font-semibold tracking-wider text-xs">PROTEIN</span>
+                <span className="font-bold">{Math.round(macros.total_protein_g)}g</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground font-semibold tracking-wider text-xs">CARBS</span>
+                <span className="font-bold">{Math.round(macros.total_carbs_g)}g</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground font-semibold tracking-wider text-xs">FIBER</span>
+                <span className="font-bold">{Math.round(macros.total_fiber_g)}g</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Hydration Tracker */}
-        <section className="bg-card border shadow-sm rounded-2xl p-5 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              <Droplet className="w-4 h-4 text-sky-500 fill-sky-500/20" />
-              Hydration
-            </h2>
-            <span className="text-xs font-medium text-muted-foreground">
-              {totalWater} / {member?.target_water_ml || 2000} ml
-            </span>
+        {/* Target Pills */}
+        <div className="flex gap-2">
+          <div className="flex-1 bg-primary/10 rounded-xl p-3 flex flex-col items-center justify-center">
+            <span className="text-[10px] font-bold text-primary tracking-wider">PROTEIN</span>
+            <span className="text-sm font-bold text-primary mt-0.5">{Math.round(macros.total_protein_g)}<span className="text-xs text-primary/70">/{member?.target_protein_g || 100}g</span></span>
           </div>
-          
-          <div className="h-3 w-full bg-muted rounded-full overflow-hidden mb-5">
-            <motion.div
-              className="h-full bg-sky-500 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min((totalWater / (member?.target_water_ml || 2000)) * 100, 100)}%` }}
-              transition={{ duration: 1 }}
-            />
+          <div className="flex-1 bg-emerald-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
+            <span className="text-[10px] font-bold text-emerald-600 tracking-wider">FIBER</span>
+            <span className="text-sm font-bold text-emerald-600 mt-0.5">{Math.round(macros.total_fiber_g)}<span className="text-xs text-emerald-600/70">/{member?.target_fiber_g || 30}g</span></span>
           </div>
+          <div className="flex-1 bg-sky-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
+            <span className="text-[10px] font-bold text-sky-600 tracking-wider">WATER</span>
+            <span className="text-sm font-bold text-sky-600 mt-0.5">{totalWater}<span className="text-xs text-sky-600/70">/{member?.target_water_ml || 2000}ml</span></span>
+          </div>
+        </div>
 
-          <div className="flex gap-2">
-            {[250, 500].map(amt => (
-              <button
-                key={amt}
-                onClick={() => handleAddWater(amt)}
-                disabled={addingWater}
-                className="flex-1 py-2 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 font-medium rounded-xl text-sm transition-colors flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {amt}ml
-              </button>
-            ))}
+        {/* Log Water */}
+        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center">
+              <Droplet className="w-5 h-5 text-sky-500 fill-sky-500/50" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">Log Water</h3>
+              <p className="text-xs text-muted-foreground">+250ml per glass</p>
+            </div>
           </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section>
-          <h2 className="text-base font-semibold mb-3 px-1">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/log">
-              <div className="flex flex-col items-center justify-center p-4 bg-primary/10 border border-primary/20 rounded-2xl text-primary font-medium active:scale-95 transition-transform">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                  <Utensils className="w-5 h-5" />
-                </div>
-                <span>Log Meal</span>
-              </div>
-            </Link>
-            
-            <Link href="/profile">
-              <div className="flex flex-col items-center justify-center p-4 bg-card border shadow-sm rounded-2xl text-foreground font-medium active:scale-95 transition-transform">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                  <HeartPulse className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <span>Health Data</span>
-              </div>
-            </Link>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleSubtractWater} 
+              disabled={addingWater || totalWater === 0}
+              className="w-10 h-10 rounded-full border border-sky-200 text-sky-500 flex items-center justify-center active:scale-95 disabled:opacity-50 bg-sky-50/50 hover:bg-sky-50"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => handleAddWater(250)} 
+              disabled={addingWater}
+              className="h-10 px-4 rounded-full bg-sky-500 text-white font-bold flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
+            >
+              <Plus className="w-4 h-4" /> Glass
+            </button>
           </div>
         </section>
 
@@ -265,7 +270,7 @@ export function Dashboard() {
               <HeartPulse className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-semibold">Today's Weight</p>
+              <h3 className="font-bold text-foreground">Today's Weight</h3>
               {todayRecord ? (
                 <p className="text-xs text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat % logged'}</p>
               ) : (
@@ -275,7 +280,7 @@ export function Dashboard() {
           </div>
           <button 
             onClick={() => setDrawerOpen(true)}
-            className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-sm font-medium rounded-lg transition-colors"
+            className="px-4 py-2 bg-muted hover:bg-muted/80 text-sm font-semibold rounded-full transition-colors"
           >
             {todayRecord ? "Edit" : "Log Now"}
           </button>

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft } from "lucide-react";
 import { useCreateConsumptionLog, getGetDailySummaryQueryKey } from "@workspace/api-client-react";
@@ -207,13 +207,7 @@ export function Log() {
           </Link>
           <h1 className="text-xl font-bold">Log Meal</h1>
         </div>
-        <button 
-          onClick={handleCameraClick}
-          disabled={aiLoading}
-          className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center active:scale-95 transition-transform"
-        >
-          {aiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
-        </button>
+        <div className="w-10"></div> {/* Empty space to center the title */}
         <input 
           type="file" 
           accept="image/*" 
@@ -246,87 +240,95 @@ export function Log() {
           </div>
         </section>
 
-        {/* Photo Preview */}
-        <AnimatePresence>
-          {photoPreviewUrl && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="relative rounded-xl overflow-hidden shadow-sm border"
-            >
-              <img src={photoPreviewUrl} alt="Meal preview" className="w-full h-48 object-cover" />
-              <button 
-                onClick={() => { setPendingPhoto(null); setPhotoPreviewUrl(null); }}
-                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-md"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              {aiEstimated && (
-                <div className="absolute bottom-2 left-2 px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span className="text-xs font-medium text-white">AI Estimated</span>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Manual Entry */}
-        <section className="bg-card rounded-2xl border p-4 shadow-sm space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">What did you eat?</label>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">Custom Entry</h2>
+            <button 
+              onClick={handleCameraClick}
+              disabled={aiLoading}
+              className="px-3 py-1.5 rounded-full border border-primary text-primary flex items-center gap-1.5 active:scale-95 transition-transform bg-primary/5 text-sm font-medium"
+            >
+              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              Snap & Analyse
+            </button>
+          </div>
+          
+          <div className="bg-card rounded-2xl border p-4 shadow-sm space-y-4">
             <input
               type="text"
               placeholder="e.g. Grilled Chicken Salad"
               value={foodItem}
               onChange={(e) => setFoodItem(e.target.value)}
-              className="w-full px-0 py-2 bg-transparent text-lg font-medium border-b border-border focus:border-primary outline-none transition-colors"
+              className="w-full px-4 py-3 bg-transparent text-lg font-medium border rounded-xl focus:border-primary outline-none transition-colors"
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="relative">
-              <label className="absolute -top-2 left-3 px-1 bg-card text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Calories</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={customKcal}
-                onChange={(e) => setCustomKcal(e.target.value)}
-                className="w-full px-4 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-lg"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">kcal</span>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={customKcal}
+                  onChange={(e) => setCustomKcal(e.target.value)}
+                  className="w-full pl-3 pr-10 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">kcal</span>
+              </div>
+              
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={customProtein}
+                  onChange={(e) => setCustomProtein(e.target.value)}
+                  className="w-full pl-3 pr-6 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">g</span>
+              </div>
+
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={customFiber}
+                  onChange={(e) => setCustomFiber(e.target.value)}
+                  className="w-full pl-3 pr-6 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">g</span>
+              </div>
             </div>
-            
-            <div className="relative">
-              <label className="absolute -top-2 left-3 px-1 bg-card text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Protein</label>
-              <input
-                type="number"
-                placeholder="0"
-                value={customProtein}
-                onChange={(e) => setCustomProtein(e.target.value)}
-                className="w-full px-4 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-lg"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">g</span>
-            </div>
-          </div>
-          
-          <div className="relative pt-2">
-            <label className="absolute top-0 left-3 px-1 bg-card text-[10px] font-semibold text-muted-foreground uppercase tracking-wider z-10">Fiber</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={customFiber}
-              onChange={(e) => setCustomFiber(e.target.value)}
-              className="w-full px-4 py-3 mt-2 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-lg"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pt-2">g</span>
+
+            {/* Photo Preview inside Card */}
+            <AnimatePresence>
+              {photoPreviewUrl && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="relative rounded-xl overflow-hidden shadow-sm border mt-4"
+                >
+                  <img src={photoPreviewUrl} alt="Meal preview" className="w-full h-48 object-cover" />
+                  <button 
+                    onClick={() => { setPendingPhoto(null); setPhotoPreviewUrl(null); }}
+                    className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full backdrop-blur-md"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  {aiEstimated && (
+                    <div className="absolute bottom-2 left-2 px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <span className="text-xs font-medium text-white">AI Estimated — tap any field to adjust</span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <button
             disabled={createLog.isPending || !foodItem.trim()}
             onClick={handleSave}
-            className="w-full mt-6 py-3.5 bg-primary text-primary-foreground font-semibold rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 text-lg shadow-sm"
           >
             {createLog.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Meal"}
           </button>

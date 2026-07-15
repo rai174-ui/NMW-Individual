@@ -230,4 +230,32 @@ router.post("/members/:id/water", async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
+// DELETE /api/members/:id/water/latest
+router.delete("/members/:id/water/latest", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const date = req.query.date as string | undefined;
+  
+  if (!date) {
+    res.status(400).json({ error: "date query param is required (YYYY-MM-DD)" });
+    return;
+  }
+  
+  // Delete the most recent water log for this member on the given date
+  const { rowCount, rows } = await pool.query(
+    `DELETE FROM water_logs 
+     WHERE id IN (
+       SELECT id FROM water_logs 
+       WHERE member_id = $1 AND DATE(logged_at AT TIME ZONE 'Asia/Kolkata') = $2 
+       ORDER BY logged_at DESC LIMIT 1
+     ) RETURNING *`,
+    [memberId, date]
+  );
+  
+  if (rowCount === 0) {
+    res.status(404).json({ error: "No water log found to delete today" });
+    return;
+  }
+  res.json({ message: "Deleted latest log", deleted: rows[0] });
+});
+
 export default router;
