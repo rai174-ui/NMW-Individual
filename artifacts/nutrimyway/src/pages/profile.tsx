@@ -1,7 +1,7 @@
 import { useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { motion } from "framer-motion";
-import { LogOut, Info, HeartPulse, Activity } from "lucide-react";
+import { LogOut, Info, HeartPulse, Activity, User } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "wouter";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -95,7 +95,7 @@ export function Profile() {
           className="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors active:scale-95 absolute top-4 right-12"
           aria-label="Edit Profile"
         >
-          <UserIcon className="w-5 h-5" />
+          <User className="w-5 h-5" />
         </button>
         <button 
           onClick={logout}
