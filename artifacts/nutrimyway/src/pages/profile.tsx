@@ -90,20 +90,22 @@ export function Profile() {
           <Info className="w-3.5 h-3.5" />
           About
         </Link>
-        <button
-          onClick={() => setProfileDrawerOpen(true)}
-          className="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors active:scale-95 absolute top-4 right-12"
-          aria-label="Edit Profile"
-        >
-          <User className="w-5 h-5" />
-        </button>
-        <button 
-          onClick={logout}
-          className="text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-full transition-colors active:scale-95 text-xs font-semibold flex items-center gap-1.5 absolute top-4 right-0"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          Logout
-        </button>
+        <div className="absolute top-4 right-0 flex items-center gap-2">
+          <button
+            onClick={() => setProfileDrawerOpen(true)}
+            className="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors active:scale-95"
+            aria-label="Edit Profile"
+          >
+            <User className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={logout}
+            className="text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-full transition-colors active:scale-95 text-xs font-semibold flex items-center gap-1.5"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Logout
+          </button>
+        </div>
         <div className="w-24 h-24 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-3xl font-bold">
           {getInitials(member?.name)}
         </div>

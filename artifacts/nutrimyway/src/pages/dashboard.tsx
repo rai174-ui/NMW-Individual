@@ -172,7 +172,7 @@ export function Dashboard() {
               {format(new Date(), "EEEE, MMMM do")}
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Hi, {member?.name?.split(" ")[0] || "Guest"} ??
+              Hi, {member?.name?.split(" ")[0] || "Guest"}
             </h1>
           </div>
           <button 
