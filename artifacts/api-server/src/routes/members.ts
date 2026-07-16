@@ -48,9 +48,9 @@ router.put("/members/:id/profile", async (req, res) => {
   const memberId = Number(req.params.id);
   const { name, height_cm, mobile, dob } = req.body;
   const { rows } = await pool.query(
-    UPDATE members 
+    `UPDATE members 
      SET name = COALESCE($1, name), height_cm = $2, mobile = $3, dob = $4 
-     WHERE id = $5 RETURNING id, name, height_cm, mobile, dob,
+     WHERE id = $5 RETURNING id, name, height_cm, mobile, dob`,
     [
       name, 
       height_cm ?? null, 
