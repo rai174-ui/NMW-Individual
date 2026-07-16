@@ -98,6 +98,13 @@ async function createTables(): Promise<void> {
       used BOOLEAN NOT NULL DEFAULT FALSE
     );
   `);
+  
+  // Add missing columns if they don't exist (poor man's migration)
+  try {
+    await pool.query(`ALTER TABLE public.consumption_logs ADD COLUMN IF NOT EXISTS fiber_g REAL;`);
+  } catch (e) {
+    logger.warn({ err: e }, "Failed to add fiber_g column. It may already exist or table is missing.");
+  }
 }
 
 export async function initDb(): Promise<void> {
