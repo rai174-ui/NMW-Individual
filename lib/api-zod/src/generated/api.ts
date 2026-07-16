@@ -69,8 +69,13 @@ export const GetMemberResponse = zod.object({
   "membership_no": zod.string().nullish().describe('The human-readable membership number shown to the member'),
   "name": zod.string(),
   "date_of_joining": zod.string().nullish(),
+  "gender": zod.string().nullish().describe('Member gender: male, female, or other'),
   "height_cm": zod.number().nullish(),
-  "daily_kcal": zod.number().nullish()
+  "daily_kcal": zod.number().nullish(),
+  "email": zod.string().nullish(),
+  "target_protein_g": zod.number().nullish(),
+  "target_fiber_g": zod.number().nullish(),
+  "target_water_ml": zod.number().nullish()
 })
 
 
@@ -194,7 +199,9 @@ export const CreateConsumptionLogBody = zod.object({
   "protein_g": zod.number().nullish(),
   "carbs_g": zod.number().nullish(),
   "fat_g": zod.number().nullish(),
-  "photo_url": zod.string().nullish()
+  "fiber_g": zod.number().nullish(),
+  "photo_url": zod.string().nullish(),
+  "logged_at": zod.string().nullish()
 })
 
 export const CreateConsumptionLogResponse = zod.object({
@@ -226,10 +233,11 @@ export const GetDailySummaryQueryParams = zod.object({
 
 export const GetDailySummaryResponse = zod.object({
   "date": zod.string(),
-  "total_calories": zod.number(),
-  "total_protein": zod.number(),
-  "total_carbs": zod.number(),
-  "total_fat": zod.number(),
+  "total_kcal": zod.number().optional(),
+  "total_protein_g": zod.number().optional(),
+  "total_carbs_g": zod.number().optional(),
+  "total_fat_g": zod.number().optional(),
+  "total_fiber_g": zod.number().optional(),
   "target_calories": zod.number().optional(),
   "logs_by_slot": zod.record(zod.string(), zod.array(zod.object({
   "id": zod.number(),

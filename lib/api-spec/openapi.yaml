@@ -354,6 +354,14 @@ components:
           type: ["integer", "null"]
         daily_kcal:
           type: ["integer", "null"]
+        email:
+          type: ["string", "null"]
+        target_protein_g:
+          type: ["integer", "null"]
+        target_fiber_g:
+          type: ["integer", "null"]
+        target_water_ml:
+          type: ["integer", "null"]
       required:
         - id
         - name
@@ -504,7 +512,11 @@ components:
           type: ["number", "null"]
         fat_g:
           type: ["number", "null"]
+        fiber_g:
+          type: ["number", "null"]
         photo_url:
+          type: ["string", "null"]
+        logged_at:
           type: ["string", "null"]
       required:
         - meal_slot
@@ -515,17 +527,31 @@ components:
       properties:
         date:
           type: string
-        total_calories:
+        total_kcal:
           type: number
-        total_protein:
+        total_protein_g:
           type: number
-        total_carbs:
+        total_carbs_g:
           type: number
-        total_fat:
+        total_fat_g:
+          type: number
+        total_fiber_g:
           type: number
         target_calories:
           type: number
         logs_by_slot:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/ConsumptionLog"
+      required:
+        - date
+        - total_kcal
+        - total_protein_g
+        - total_carbs_g
+        - total_fat_g
+        - total_fiber_g
           type: object
           additionalProperties:
             type: array

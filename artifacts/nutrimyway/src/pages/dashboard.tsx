@@ -1,4 +1,4 @@
-import { useGetMember, getGetMemberQueryKey, useGetDailySummary } from "@workspace/api-client-react";
+import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
 import { Plus, Minus, LogOut, Utensils, HeartPulse, User } from "lucide-react";
@@ -82,8 +82,8 @@ export function Dashboard() {
   const { memberId, logout } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: member } = useGetMember(memberId!, { query: { enabled: !!memberId } });
-  const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId } });
+  const { data: member } = useGetMember(memberId!, { query: { enabled: !!memberId, queryKey: getGetMemberQueryKey(memberId!) } });
+  const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetDailySummaryQueryKey(memberId!, { date: TODAY }) } });
 
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [waterLogs, setWaterLogs] = useState<any[]>([]);
@@ -204,15 +204,15 @@ export function Dashboard() {
             <div className="w-1/2 flex flex-col justify-center gap-3 pr-2">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-semibold tracking-wider text-xs">PROTEIN</span>
-                <span className="font-bold">{Math.round(macros.total_protein_g)}g</span>
+                <span className="font-bold">{Math.round(macros.total_protein_g ?? 0)}g</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-semibold tracking-wider text-xs">CARBS</span>
-                <span className="font-bold">{Math.round(macros.total_carbs_g)}g</span>
+                <span className="font-bold">{Math.round(macros.total_carbs_g ?? 0)}g</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-semibold tracking-wider text-xs">FIBER</span>
-                <span className="font-bold">{Math.round(macros.total_fiber_g)}g</span>
+                <span className="font-bold">{Math.round(macros.total_fiber_g ?? 0)}g</span>
               </div>
             </div>
           </div>
@@ -222,11 +222,11 @@ export function Dashboard() {
         <div className="flex gap-2">
           <div className="flex-1 bg-primary/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-primary tracking-wider">PROTEIN</span>
-            <span className="text-sm font-bold text-primary mt-0.5">{Math.round(macros.total_protein_g)}<span className="text-xs text-primary/70">/{member?.target_protein_g || 100}g</span></span>
+            <span className="text-sm font-bold text-primary mt-0.5">{Math.round(macros.total_protein_g ?? 0)}<span className="text-xs text-primary/70">/{member?.target_protein_g || 100}g</span></span>
           </div>
           <div className="flex-1 bg-emerald-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-emerald-600 tracking-wider">FIBER</span>
-            <span className="text-sm font-bold text-emerald-600 mt-0.5">{Math.round(macros.total_fiber_g)}<span className="text-xs text-emerald-600/70">/{member?.target_fiber_g || 30}g</span></span>
+            <span className="text-sm font-bold text-emerald-600 mt-0.5">{Math.round(macros.total_fiber_g ?? 0)}<span className="text-xs text-emerald-600/70">/{member?.target_fiber_g || 30}g</span></span>
           </div>
           <div className="flex-1 bg-sky-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-sky-600 tracking-wider">WATER</span>

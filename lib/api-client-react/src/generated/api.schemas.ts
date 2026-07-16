@@ -19,10 +19,23 @@ export interface Member {
   name: string;
   /** @nullable */
   date_of_joining?: string | null;
+  /**
+     * Member gender: male, female, or other
+     * @nullable
+     */
+  gender?: string | null;
   /** @nullable */
   height_cm?: number | null;
   /** @nullable */
   daily_kcal?: number | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  target_protein_g?: number | null;
+  /** @nullable */
+  target_fiber_g?: number | null;
+  /** @nullable */
+  target_water_ml?: number | null;
 }
 
 export interface MemberStatus {
@@ -113,8 +126,6 @@ export interface ConsumptionLog {
   /** @nullable */
   fat_g?: number | null;
   /** @nullable */
-  fiber_g?: number | null;
-  /** @nullable */
   photo_url?: string | null;
   /** @nullable */
   photo_uploaded_at?: string | null;
@@ -137,17 +148,19 @@ export interface ConsumptionLogInput {
   fiber_g?: number | null;
   /** @nullable */
   photo_url?: string | null;
+  /** @nullable */
+  logged_at?: string | null;
 }
 
 export type DailySummaryLogsBySlot = {[key: string]: ConsumptionLog[]};
 
 export interface DailySummary {
   date: string;
-  total_calories: number;
-  total_protein: number;
-  total_carbs: number;
-  total_fat: number;
-  total_fiber?: number;
+  total_kcal?: number;
+  total_protein_g?: number;
+  total_carbs_g?: number;
+  total_fat_g?: number;
+  total_fiber_g?: number;
   target_calories?: number;
   logs_by_slot?: DailySummaryLogsBySlot;
 }

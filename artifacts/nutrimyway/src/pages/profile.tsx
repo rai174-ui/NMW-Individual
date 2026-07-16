@@ -41,7 +41,7 @@ export function Profile() {
   }, [fetchRecords]);
 
   const { data: member } = useGetMember(MEMBER_ID!, {
-    query: { enabled: !!MEMBER_ID }
+    query: { enabled: !!MEMBER_ID, queryKey: getGetMemberQueryKey(MEMBER_ID!) }
   });
 
   const handleTargetsSuccess = () => {
