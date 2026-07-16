@@ -58,8 +58,6 @@ export interface Center {
 export interface HealthRecord {
   id: number;
   member_id: number;
-  /** @nullable */
-  center_id?: string | null;
   recorded_at: string;
   /** @nullable */
   weight_kg?: number | null;
@@ -87,8 +85,6 @@ export interface HealthRecordInput {
      * @nullable
      */
   recorded_at?: string | null;
-  /** @nullable */
-  center_id?: string | null;
   /** @nullable */
   weight_kg?: number | null;
   /** @nullable */
@@ -156,11 +152,11 @@ export type DailySummaryLogsBySlot = {[key: string]: ConsumptionLog[]};
 
 export interface DailySummary {
   date: string;
-  total_kcal?: number;
-  total_protein_g?: number;
-  total_carbs_g?: number;
-  total_fat_g?: number;
-  total_fiber_g?: number;
+  total_kcal: number;
+  total_protein_g: number;
+  total_carbs_g: number;
+  total_fat_g: number;
+  total_fiber_g: number;
   target_calories?: number;
   logs_by_slot?: DailySummaryLogsBySlot;
 }
@@ -196,8 +192,6 @@ export interface PackSize {
 export interface Issuance {
   id: number;
   member_id: number;
-  /** @nullable */
-  center_id?: string | null;
   /** @nullable */
   pack_label?: string | null;
   issued_at: string;

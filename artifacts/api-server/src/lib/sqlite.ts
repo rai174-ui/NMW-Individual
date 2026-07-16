@@ -106,6 +106,9 @@ async function createTables(): Promise<void> {
     await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_protein_g REAL;`);
     await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fiber_g REAL;`);
     await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_water_ml REAL;`);
+    
+    await pool.query(`ALTER TABLE public.health_records DROP COLUMN IF EXISTS center_id;`);
+    await pool.query(`ALTER TABLE public.issuances DROP COLUMN IF EXISTS center_id;`);
   } catch (e) {
     logger.warn({ err: e }, "Failed to add fiber_g column. It may already exist or table is missing.");
   }

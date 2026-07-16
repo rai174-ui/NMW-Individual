@@ -43,6 +43,25 @@ router.put("/members/:id/targets", async (req, res) => {
   res.json(rows[0]);
 });
 
+// PUT /api/members/:id/profile
+router.put("/members/:id/profile", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { name, height_cm, mobile, dob } = req.body;
+  const { rows } = await pool.query(
+    UPDATE members 
+     SET name = COALESCE($1, name), height_cm = $2, mobile = $3, dob = $4 
+     WHERE id = $5 RETURNING id, name, height_cm, mobile, dob,
+    [
+      name, 
+      height_cm ?? null, 
+      mobile ?? null, 
+      dob ?? null, 
+      memberId
+    ]
+  );
+  res.json(rows[0]);
+});
+
 // GET /api/members/:id/health-records
 router.get("/members/:id/health-records", async (req, res) => {
   const { rows } = await pool.query(
@@ -261,3 +280,4 @@ router.delete("/members/:id/water/latest", async (req, res) => {
 });
 
 export default router;
+

@@ -408,8 +408,6 @@ components:
           type: integer
         member_id:
           type: integer
-        center_id:
-          type: ["string", "null"]
         recorded_at:
           type: string
         weight_kg:
@@ -441,8 +439,6 @@ components:
         recorded_at:
           type: ["string", "null"]
           description: ISO date or date-time string; defaults to now if omitted
-        center_id:
-          type: ["string", "null"]
         weight_kg:
           type: ["number", "null"]
         body_fat_pct:
@@ -552,17 +548,6 @@ components:
         - total_carbs_g
         - total_fat_g
         - total_fiber_g
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: "#/components/schemas/ConsumptionLog"
-      required:
-        - date
-        - total_calories
-        - total_protein
-        - total_carbs
-        - total_fat
 
     BomItem:
       type: object
@@ -611,8 +596,6 @@ components:
           type: integer
         member_id:
           type: integer
-        center_id:
-          type: ["string", "null"]
         pack_label:
           type: ["string", "null"]
         issued_at:

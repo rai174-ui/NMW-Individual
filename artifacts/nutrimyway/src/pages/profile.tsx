@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api-base";
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from "recharts";
 import { RecordHealthDrawer } from "@/components/record-health-drawer";
 import { TargetsDrawer } from "@/components/targets-drawer";
+import { ProfileDrawer } from "@/components/profile-drawer";
 import { useQueryClient } from "@tanstack/react-query";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
@@ -24,6 +25,7 @@ export function Profile() {
   const [chartMetric, setChartMetric] = useState<"weight_kg" | "body_fat_pct">("weight_kg");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [targetsDrawerOpen, setTargetsDrawerOpen] = useState(false);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
 
   const fetchRecords = useCallback(() => {
     if (MEMBER_ID) {
@@ -89,12 +91,18 @@ export function Profile() {
           About
         </Link>
         <button
+          onClick={() => setProfileDrawerOpen(true)}
+          className="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors active:scale-95 absolute top-4 right-12"
+          aria-label="Edit Profile"
+        >
+          <UserIcon className="w-5 h-5" />
+        </button>
+        <button 
           onClick={logout}
-          className="absolute top-4 right-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Log out"
+          className="text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-full transition-colors active:scale-95 text-xs font-semibold flex items-center gap-1.5 absolute top-4 right-0"
         >
           <LogOut className="w-3.5 h-3.5" />
-          Log out
+          Logout
         </button>
         <div className="w-24 h-24 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-3xl font-bold">
           {getInitials(member?.name)}
@@ -281,6 +289,13 @@ export function Profile() {
       <TargetsDrawer
         open={targetsDrawerOpen}
         onOpenChange={setTargetsDrawerOpen}
+        member={member}
+        onSuccess={handleTargetsSuccess}
+      />
+
+      <ProfileDrawer
+        open={profileDrawerOpen}
+        onOpenChange={setProfileDrawerOpen}
         member={member}
         onSuccess={handleTargetsSuccess}
       />

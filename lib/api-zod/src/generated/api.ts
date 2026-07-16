@@ -103,7 +103,6 @@ export const GetHealthRecordsParams = zod.object({
 export const GetHealthRecordsResponseItem = zod.object({
   "id": zod.number(),
   "member_id": zod.number(),
-  "center_id": zod.string().nullish(),
   "recorded_at": zod.string(),
   "weight_kg": zod.number().nullish(),
   "body_fat_pct": zod.number().nullish(),
@@ -127,7 +126,6 @@ export const CreateHealthRecordParams = zod.object({
 
 export const CreateHealthRecordBody = zod.object({
   "recorded_at": zod.string().nullish().describe('ISO date or date-time string; defaults to now if omitted'),
-  "center_id": zod.string().nullish(),
   "weight_kg": zod.number().nullish(),
   "body_fat_pct": zod.number().nullish(),
   "visceral_fat": zod.number().nullish(),
@@ -142,7 +140,6 @@ export const CreateHealthRecordBody = zod.object({
 export const CreateHealthRecordResponse = zod.object({
   "id": zod.number(),
   "member_id": zod.number(),
-  "center_id": zod.string().nullish(),
   "recorded_at": zod.string(),
   "weight_kg": zod.number().nullish(),
   "body_fat_pct": zod.number().nullish(),
@@ -233,11 +230,11 @@ export const GetDailySummaryQueryParams = zod.object({
 
 export const GetDailySummaryResponse = zod.object({
   "date": zod.string(),
-  "total_kcal": zod.number().optional(),
-  "total_protein_g": zod.number().optional(),
-  "total_carbs_g": zod.number().optional(),
-  "total_fat_g": zod.number().optional(),
-  "total_fiber_g": zod.number().optional(),
+  "total_kcal": zod.number(),
+  "total_protein_g": zod.number(),
+  "total_carbs_g": zod.number(),
+  "total_fat_g": zod.number(),
+  "total_fiber_g": zod.number(),
   "target_calories": zod.number().optional(),
   "logs_by_slot": zod.record(zod.string(), zod.array(zod.object({
   "id": zod.number(),
@@ -283,7 +280,6 @@ export const GetMemberIssuancesParams = zod.object({
 export const GetMemberIssuancesResponseItem = zod.object({
   "id": zod.number(),
   "member_id": zod.number(),
-  "center_id": zod.string().nullish(),
   "pack_label": zod.string().nullish(),
   "issued_at": zod.string(),
   "status": zod.string().nullish()
