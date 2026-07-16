@@ -72,7 +72,7 @@ export function Login() {
       <Card className="w-full max-w-md card-shadow-none sm:shadow-sm">
         <CardHeader>
           <div className="flex justify-center mb-2">
-            <img src="/logo.png?v=2" alt="NutriMyWay Logo" className="h-16 w-auto drop-shadow-sm" />
+            <img src="/logo.jpg" alt="NutriMyWay Logo" className="h-16 w-auto drop-shadow-sm" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
             {mode === "login" ? "Log in" : mode === "register" ? "Create Account" : "Reset Password"}

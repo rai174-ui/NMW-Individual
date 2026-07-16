@@ -56,7 +56,7 @@ export function About() {
           className="relative z-10 flex flex-col items-center text-center gap-3"
         >
           <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-lg p-3">
-            <img src="logo.png" alt="NutriMyWay" className="w-full h-full object-contain" />
+            <img src="/logo.jpg" alt="NutriMyWay" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">NutriMyWay</h1>
