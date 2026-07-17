@@ -263,9 +263,9 @@ export function Log() {
               <button
                 key={s.id}
                 onClick={() => setActiveSlot(s.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-colors ${
+                className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ${
                   activeSlot === s.id 
-                    ? "bg-primary/10 border-primary text-primary" 
+                    ? "bg-primary border-primary text-primary-foreground shadow-md scale-105" 
                     : "bg-card border-border text-muted-foreground hover:bg-muted"
                 }`}
               >
@@ -274,6 +274,32 @@ export function Log() {
               </button>
             ))}
           </div>
+
+          {/* Logged Meals for Selected Slot */}
+          {(() => {
+            const slotLogs = logs?.filter(l => l.meal_slot.toLowerCase() === activeSlot.toLowerCase()) || [];
+            if (slotLogs.length === 0) return null;
+            return (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="bg-primary/5 rounded-xl p-3 border border-primary/10 mt-4"
+              >
+                <h3 className="text-xs font-bold text-primary mb-2 uppercase tracking-wider">Already logged for {activeSlot}</h3>
+                <div className="space-y-2">
+                  {slotLogs.map(log => (
+                    <div key={log.id} className="flex justify-between items-center text-sm">
+                      <span className="text-foreground truncate pr-2 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-primary/50 shrink-0" />
+                        {log.food_item}
+                      </span>
+                      <span className="text-muted-foreground font-medium shrink-0">{log.calories_kcal} kcal</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            );
+          })()}
         </section>
 
         {/* Manual Entry */}
