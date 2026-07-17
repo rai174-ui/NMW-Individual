@@ -208,10 +208,6 @@ export function Dashboard() {
                 <span className="font-bold">{Math.round(macros.total_protein_g ?? 0)}g</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-semibold tracking-wider text-xs">CARBS</span>
-                <span className="font-bold">{Math.round(macros.total_carbs_g ?? 0)}g</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-semibold tracking-wider text-xs">FIBER</span>
                 <span className="font-bold">{Math.round(macros.total_fiber_g ?? 0)}g</span>
               </div>
@@ -296,6 +292,42 @@ export function Dashboard() {
           >
             {todayRecord ? "Edit" : "Log Now"}
           </button>
+        </section>
+
+        {/* Today's Meals */}
+        <section className="bg-card border shadow-sm rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-foreground flex items-center gap-2">
+              <Utensils className="w-4 h-4 text-primary" />
+              TODAY'S MEALS
+            </h3>
+            <Link href="/log" className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors">
+              <Plus className="w-5 h-5" />
+            </Link>
+          </div>
+          
+          <div className="space-y-4">
+            {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
+              const items = daily?.logs_by_slot?.[slot] || [];
+              return (
+                <div key={slot} className="border-t pt-3 first:border-0 first:pt-0">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{slot}</h4>
+                  {items.length > 0 ? (
+                    <div className="space-y-2">
+                      {items.map(item => (
+                        <div key={item.id} className="flex justify-between items-center text-sm">
+                          <span className="text-foreground">{item.food_item}</span>
+                          <span className="text-muted-foreground">{item.calories_kcal} kcal</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[10px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-6">Nothing Logged</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </section>
 
       </main>

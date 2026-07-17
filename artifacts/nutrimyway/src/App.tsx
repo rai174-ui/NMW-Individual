@@ -7,6 +7,7 @@ import { Layout } from "@/components/layout";
 import { Dashboard } from "@/pages/dashboard";
 import { Log } from "@/pages/log";
 import { Profile } from "@/pages/profile";
+import { Health } from "@/pages/health";
 import { Login } from "@/pages/login";
 import { About } from "@/pages/about";
 import { Home } from "@/pages/home";
@@ -92,6 +93,7 @@ function ProtectedRouter() {
       <Switch>
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/log" component={Log} />
+        <Route path="/health" component={Health} />
         <Route path="/profile" component={Profile} />
         <Route path="/about" component={About} />
         <Route component={NotFound} />
