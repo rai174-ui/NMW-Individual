@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft, Trash2 } from "lucide-react";
+import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,6 @@ import { native, snapPhoto } from "@/lib/capacitor";
 import { apiFetch } from "@/lib/api-base";
 import { format, parseISO, isValid, isToday } from "date-fns";
 import { Link } from "wouter";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function todayLocal() { return new Date().toLocaleDateString("en-CA"); }
 
@@ -63,6 +62,11 @@ export function Log() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+  
+  // Track open state for collapsible meal categories
+  const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({ 
+    Breakfast: true, Lunch: true, Snack: true, Dinner: true 
+  });
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -248,14 +252,8 @@ export function Log() {
       </header>
 
       <div className="p-4 max-w-lg mx-auto">
-        <Tabs defaultValue="log" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="log">Log Meal</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="log" className="space-y-6 outline-none">
-        {/* Meal Slot Picker */}
+        <div className="space-y-6">
+          {/* Meal Slot Picker */}
         <section>
           <h2 className="text-sm font-semibold mb-3">When did you eat?</h2>
           <div className="grid grid-cols-4 gap-2">
@@ -396,37 +394,73 @@ export function Log() {
             {isSaving && "Saving..."}
           </button>
         </section>
-        </TabsContent>
-        <TabsContent value="history" className="mt-4 outline-none">
+
+        {/* Today's Logged Meals (Collapsible by Category) */}
+        <section className="pt-8">
+          <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-4">Today's Logs</h2>
           <div className="space-y-3 pb-8">
-            {logs?.length === 0 ? (
-              <p className="text-center text-muted-foreground mt-8 text-sm">No meals logged yet.</p>
-            ) : (
-              logs?.map((log) => (
-                <div key={log.id} className="bg-card border shadow-sm rounded-xl p-4 flex justify-between items-center">
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold text-primary uppercase tracking-wider">{log.meal_slot}</span>
-                      <span className="text-xs text-muted-foreground">{safeFormat(log.logged_at, "h:mm a")}</span>
-                    </div>
-                    <p className="font-bold text-foreground truncate text-sm">{log.food_item}</p>
-                    <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
-                      {log.calories_kcal != null && <span>{log.calories_kcal} kcal</span>}
-                      {log.protein_g != null && <span>{log.protein_g}g protein</span>}
-                    </div>
-                  </div>
+            {slots.map(s => {
+              const slotLogs = logs?.filter(l => l.meal_slot.toLowerCase() === s.id.toLowerCase()) || [];
+              if (slotLogs.length === 0) return null;
+              
+              const isExpanded = expandedSlots[s.id];
+              return (
+                <div key={s.id} className="bg-card border rounded-2xl overflow-hidden shadow-sm">
                   <button 
-                    onClick={() => handleDelete(log.id)}
-                    className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                    onClick={() => setExpandedSlots(prev => ({...prev, [s.id]: !prev[s.id]}))}
+                    className="w-full p-4 flex items-center justify-between bg-muted/20 active:bg-muted/40 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <div className="flex items-center gap-3">
+                      <s.icon className="w-5 h-5 text-primary" />
+                      <span className="font-bold text-foreground">{s.id}</span>
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                        {slotLogs.length} {slotLogs.length === 1 ? 'item' : 'items'}
+                      </span>
+                    </div>
+                    {isExpanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
                   </button>
+                  
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: "auto" }}
+                        exit={{ height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-3 space-y-2 border-t">
+                          {slotLogs.map(log => (
+                            <div key={log.id} className="bg-background border rounded-xl p-3 flex justify-between items-center">
+                              <div className="flex-1 min-w-0 pr-3">
+                                <p className="font-bold text-foreground text-sm truncate">{log.food_item}</p>
+                                <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                                  {log.calories_kcal != null && <span>{log.calories_kcal} kcal</span>}
+                                  {log.protein_g != null && <span>{log.protein_g}g protein</span>}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground/60 mt-1">{safeFormat(log.logged_at, "h:mm a")}</div>
+                              </div>
+                              <button 
+                                onClick={() => handleDelete(log.id)}
+                                className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors shrink-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              ))
+              );
+            })}
+            
+            {logs?.length === 0 && (
+              <p className="text-center text-muted-foreground mt-4 text-sm py-8 border border-dashed rounded-2xl">No meals logged yet today.</p>
             )}
           </div>
-        </TabsContent>
-        </Tabs>
+        </section>
+        </div>
       </div>
     </div>
   );
