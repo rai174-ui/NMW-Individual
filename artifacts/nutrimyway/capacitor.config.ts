@@ -2,7 +2,7 @@ import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "in.nutrimyway.app",
-  appName: "NutriMyWay",
+  appName: "NMW-Solo",
   webDir: "dist/public",
   server: {
     // In production, the app loads from the bundled files.
