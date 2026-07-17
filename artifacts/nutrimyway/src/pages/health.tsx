@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { format, isValid } from "date-fns";
-import { motion } from "framer-motion";
-import { Plus, HeartPulse, Activity, MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, HeartPulse, Activity, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { apiFetch } from "@/lib/api-base";
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -18,6 +18,8 @@ export function Health() {
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [chartMetric, setChartMetric] = useState<"weight_kg" | "body_fat_pct">("weight_kg");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [weightHistoryOpen, setWeightHistoryOpen] = useState(false);
+  const [fatHistoryOpen, setFatHistoryOpen] = useState(false);
 
   const fetchRecords = useCallback(() => {
     if (MEMBER_ID) {
@@ -149,37 +151,107 @@ export function Health() {
         )}
       </section>
 
-      <section className="bg-card border rounded-2xl p-5 shadow-sm">
-        <h2 className="text-sm font-semibold tracking-wider text-foreground uppercase mb-4">
-          PROGRESS HISTORY
-        </h2>
-        
-        {!healthRecords || healthRecords.length === 0 ? (
-          <div className="py-8 text-center bg-muted/30 rounded-xl border border-dashed">
-            <HeartPulse className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
-            <p className="text-sm text-muted-foreground">No health records found.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {healthRecords.map((r: any) => (
-              <div key={r.id} className="flex flex-col p-3 rounded-xl bg-muted/30 border">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-muted-foreground">{safeFormat(r.recorded_at, "MMM do, yyyy h:mm a")}</span>
-                  {r.weight_kg && <span className="text-sm font-bold">{r.weight_kg} kg</span>}
+      <div className="space-y-4">
+        {/* Weight Progress Section */}
+        <section className="bg-card border rounded-2xl shadow-sm overflow-hidden">
+          <button 
+            onClick={() => setWeightHistoryOpen(!weightHistoryOpen)}
+            className="w-full p-5 flex justify-between items-center bg-card hover:bg-muted/30 transition-colors"
+          >
+            <h2 className="text-sm font-semibold tracking-wider text-foreground uppercase">
+              WEIGHT PROGRESS
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
+                {healthRecords.filter(r => r.weight_kg != null).length} items
+              </span>
+              {weightHistoryOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+            </div>
+          </button>
+          
+          <AnimatePresence>
+            {weightHistoryOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="p-5 pt-0 border-t bg-muted/10">
+                  {healthRecords.filter(r => r.weight_kg != null).length === 0 ? (
+                    <div className="py-8 text-center bg-muted/30 rounded-xl border border-dashed">
+                      <HeartPulse className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
+                      <p className="text-sm text-muted-foreground">No weight records found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {healthRecords.filter(r => r.weight_kg != null).map((r: any) => (
+                        <div key={r.id} className="flex flex-col p-3 rounded-xl bg-card border shadow-sm">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-semibold text-muted-foreground">{safeFormat(r.recorded_at, "MMM do, yyyy h:mm a")}</span>
+                            <span className="text-sm font-bold text-foreground">{r.weight_kg} kg</span>
+                          </div>
+                          {r.notes && <p className="text-sm text-muted-foreground mt-1">{r.notes}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {r.notes && <p className="text-sm text-foreground mt-1">{r.notes}</p>}
-                
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {r.body_fat_pct != null && <div className="text-xs"><span className="text-muted-foreground">Fat:</span> {r.body_fat_pct}%</div>}
-                  {r.bmi != null && <div className="text-xs"><span className="text-muted-foreground">BMI:</span> {r.bmi}</div>}
-                  {r.metabolic_age != null && <div className="text-xs"><span className="text-muted-foreground">Met Age:</span> {r.metabolic_age}y</div>}
-                  {r.resting_hr != null && <div className="text-xs"><span className="text-muted-foreground">RHR:</span> {r.resting_hr} bpm</div>}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+
+        {/* Fat Progress Section */}
+        <section className="bg-card border rounded-2xl shadow-sm overflow-hidden">
+          <button 
+            onClick={() => setFatHistoryOpen(!fatHistoryOpen)}
+            className="w-full p-5 flex justify-between items-center bg-card hover:bg-muted/30 transition-colors"
+          >
+            <h2 className="text-sm font-semibold tracking-wider text-foreground uppercase">
+              FAT PROGRESS
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
+                {healthRecords.filter(r => r.body_fat_pct != null).length} items
+              </span>
+              {fatHistoryOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+            </div>
+          </button>
+          
+          <AnimatePresence>
+            {fatHistoryOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="p-5 pt-0 border-t bg-muted/10">
+                  {healthRecords.filter(r => r.body_fat_pct != null).length === 0 ? (
+                    <div className="py-8 text-center bg-muted/30 rounded-xl border border-dashed">
+                      <HeartPulse className="w-8 h-8 mx-auto text-muted-foreground/40 mb-2" />
+                      <p className="text-sm text-muted-foreground">No fat records found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {healthRecords.filter(r => r.body_fat_pct != null).map((r: any) => (
+                        <div key={r.id} className="flex flex-col p-3 rounded-xl bg-card border shadow-sm">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-semibold text-muted-foreground">{safeFormat(r.recorded_at, "MMM do, yyyy h:mm a")}</span>
+                            <span className="text-sm font-bold text-foreground">{r.body_fat_pct}%</span>
+                          </div>
+                          {r.notes && <p className="text-sm text-muted-foreground mt-1">{r.notes}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+      </div>
 
       <RecordHealthDrawer 
         open={drawerOpen} 
