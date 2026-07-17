@@ -1,15 +1,18 @@
-import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey } from "@workspace/api-client-react";
+import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetActivities, getGetActivitiesQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
-import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2 } from "lucide-react";
+import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Activity, Droplet, RefreshCw } from "lucide-react";
 import { getProgressColorClass, cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { RecordHealthDrawer } from "@/components/record-health-drawer";
+import { LogActivityDrawer } from "@/components/log-activity-drawer";
+import { syncActivities } from "@/lib/activity-sync";
+import { useToast } from "@/hooks/use-toast";
+import { Capacitor } from '@capacitor/core';
 import { useEffect, useState, useCallback } from "react";
 import { apiFetch } from "@/lib/api-base";
-import { RecordHealthDrawer } from "@/components/record-health-drawer";
-import { Droplet } from "lucide-react";
 
 function safeFormat(value: string | null | undefined, fmt: string, fallback = "--"): string {
   if (!value) return fallback;
@@ -86,11 +89,15 @@ export function Dashboard() {
   const { data: member } = useGetMember(memberId!, { query: { enabled: !!memberId, queryKey: getGetMemberQueryKey(memberId!) } });
   const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetDailySummaryQueryKey(memberId!, { date: TODAY }) } });
   const { data: logs } = useGetConsumptionLogs(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetConsumptionLogsQueryKey(memberId!, { date: TODAY }) } });
+  const { data: activities, refetch: refetchActivities } = useGetActivities(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetActivitiesQueryKey(memberId!, { date: TODAY }) } });
 
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [waterLogs, setWaterLogs] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activityDrawerOpen, setActivityDrawerOpen] = useState(false);
   const [addingWater, setAddingWater] = useState(false);
+  const [syncingActivities, setSyncingActivities] = useState(false);
+  const { toast } = useToast();
 
   const fetchRecords = useCallback(() => {
     if (memberId) {
@@ -160,9 +167,33 @@ export function Dashboard() {
     logout();
   };
 
-  const macros = daily ?? {
-    total_kcal: 0, total_protein_g: 0, total_carbs_g: 0, total_fat_g: 0, total_fiber_g: 0
+  const handleSyncActivities = async () => {
+    if (!memberId) return;
+    setSyncingActivities(true);
+    try {
+      const success = await syncActivities(memberId);
+      if (success) {
+        toast({ title: "Success", description: "Activities synced successfully!" });
+        refetchActivities();
+        queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(memberId, { date: TODAY }) });
+      } else {
+        toast({ title: "Notice", description: "No new activities found." });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error", description: "Failed to sync activities", variant: "destructive" });
+    } finally {
+      setSyncingActivities(false);
+    }
   };
+
+  const macros = daily ?? {
+    total_kcal: 0, total_protein_g: 0, total_carbs_g: 0, total_fat_g: 0, total_fiber_g: 0, total_calories_burned_kcal: 0
+  };
+  
+  const baseTarget = member?.daily_kcal || 2000;
+  const burned = macros.total_calories_burned_kcal || 0;
+  const adjustedTarget = baseTarget + burned;
 
   return (
     <div className="min-h-[100dvh] bg-background pb-20">
@@ -193,15 +224,21 @@ export function Dashboard() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
           
           <div className="flex gap-4 items-center">
-            <div className="w-1/2 flex items-center justify-center">
+            <div className="w-1/2 flex flex-col items-center justify-center">
               <ProgressRing
                 value={macros.total_kcal}
-                max={member?.daily_kcal || 2000}
+                max={adjustedTarget}
                 label="KCAL"
-                colorClass={getProgressColorClass(macros.total_kcal ?? 0, member?.daily_kcal || 2000, "stroke-primary")}
+                colorClass={getProgressColorClass(macros.total_kcal ?? 0, adjustedTarget, "stroke-primary")}
                 size={140}
                 strokeWidth={10}
               />
+              {burned > 0 && (
+                <div className="mt-2 text-[10px] font-medium text-muted-foreground flex items-center gap-1 bg-muted/30 px-2 py-0.5 rounded-full">
+                  <Activity className="w-3 h-3 text-primary/70" />
+                  <span>{baseTarget} + {burned}</span>
+                </div>
+              )}
             </div>
             <div className="w-1/2 flex flex-col justify-center gap-3 pr-2">
               <div className="flex justify-between items-center text-sm">
@@ -331,6 +368,47 @@ export function Dashboard() {
           </div>
         </section>
 
+        {/* Today's Activities */}
+        <section className="bg-card border shadow-sm rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-foreground flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" />
+              TODAY'S ACTIVITIES
+            </h3>
+            <div className="flex gap-2">
+              {Capacitor.isNativePlatform() && (
+                <button 
+                  onClick={handleSyncActivities} 
+                  disabled={syncingActivities}
+                  className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors disabled:opacity-50"
+                  title="Sync Health Data"
+                >
+                  <RefreshCw className={cn("w-5 h-5", syncingActivities && "animate-spin")} />
+                </button>
+              )}
+              <button onClick={() => setActivityDrawerOpen(true)} className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors">
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            {activities && activities.length > 0 ? (
+              activities.map(act => (
+                <div key={act.id} className="flex justify-between items-center text-sm border-b pb-2 last:border-0 last:pb-0">
+                  <div className="flex flex-col">
+                    <span className="text-foreground font-medium">{act.activity_type}</span>
+                    {act.duration_minutes && <span className="text-xs text-muted-foreground">{act.duration_minutes} mins</span>}
+                  </div>
+                  {act.calories_burned && <span className="text-primary font-bold">{act.calories_burned} kcal</span>}
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-2">No activities logged today.</div>
+            )}
+          </div>
+        </section>
+
       </main>
 
       <RecordHealthDrawer 
@@ -338,6 +416,15 @@ export function Dashboard() {
         onOpenChange={setDrawerOpen} 
         existingRecord={todayRecord}
         onSuccess={fetchRecords} 
+      />
+      
+      <LogActivityDrawer 
+        open={activityDrawerOpen}
+        onOpenChange={setActivityDrawerOpen}
+        onSuccess={() => {
+          refetchActivities();
+          queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(memberId!, { date: TODAY }) });
+        }}
       />
     </div>
   );

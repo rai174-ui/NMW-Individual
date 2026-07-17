@@ -97,6 +97,16 @@ async function createTables(): Promise<void> {
       expires_at TIMESTAMPTZ NOT NULL,
       used BOOLEAN NOT NULL DEFAULT FALSE
     );
+
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id SERIAL PRIMARY KEY,
+      member_id INTEGER REFERENCES members(id) ON DELETE CASCADE,
+      logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      activity_type TEXT NOT NULL,
+      duration_minutes INTEGER,
+      calories_burned REAL,
+      source TEXT
+    );
   `);
   
   // Add missing columns if they don't exist (poor man's migration)

@@ -157,8 +157,34 @@ export interface DailySummary {
   total_carbs_g: number;
   total_fat_g: number;
   total_fiber_g: number;
+  total_calories_burned_kcal?: number;
   target_calories?: number;
   logs_by_slot?: DailySummaryLogsBySlot;
+}
+
+export interface ActivityLog {
+  id: number;
+  member_id: number;
+  logged_at?: string;
+  activity_type: string;
+  /** @nullable */
+  duration_minutes?: number | null;
+  /** @nullable */
+  calories_burned?: number | null;
+  /** @nullable */
+  source?: string | null;
+}
+
+export interface ActivityLogInput {
+  activity_type: string;
+  /** @nullable */
+  duration_minutes?: number | null;
+  /** @nullable */
+  calories_burned?: number | null;
+  /** @nullable */
+  source?: string | null;
+  /** @nullable */
+  logged_at?: string | null;
 }
 
 export interface BomItem {
@@ -234,6 +260,13 @@ export type GetPublicObject404 = {
 };
 
 export type GetConsumptionLogsParams = {
+/**
+ * Date filter in YYYY-MM-DD format
+ */
+date?: string;
+};
+
+export type GetActivitiesParams = {
 /**
  * Date filter in YYYY-MM-DD format
  */

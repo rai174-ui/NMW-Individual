@@ -83,6 +83,7 @@
     "@capacitor/core": "^8.4.1",
     "@capacitor/local-notifications": "^8.2.0",
     "@capacitor/push-notifications": "^8.1.1",
+    "@capgo/capacitor-health": "^8.9.3",
     "html5-qrcode": "^2.3.8"
   }
 }

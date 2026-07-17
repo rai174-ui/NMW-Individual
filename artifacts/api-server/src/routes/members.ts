@@ -167,6 +167,62 @@ router.post("/members/:id/consumption", async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
+// GET /api/members/:id/activities
+router.get("/members/:id/activities", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const date = req.query.date as string | undefined;
+  if (date) {
+    const { rows } = await pool.query(
+      "SELECT * FROM activity_logs WHERE member_id = $1 AND DATE(logged_at AT TIME ZONE 'Asia/Kolkata') = $2 ORDER BY logged_at ASC",
+      [memberId, date]
+    );
+    res.json(rows);
+  } else {
+    const { rows } = await pool.query(
+      "SELECT * FROM activity_logs WHERE member_id = $1 ORDER BY logged_at DESC LIMIT 100",
+      [memberId]
+    );
+    res.json(rows);
+  }
+});
+
+// POST /api/members/:id/activities
+router.post("/members/:id/activities", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { activity_type, duration_minutes, calories_burned, source, logged_at } = req.body as {
+    activity_type: string;
+    duration_minutes?: number | null;
+    calories_burned?: number | null;
+    source?: string | null;
+    logged_at?: string | null;
+  };
+  if (!activity_type) { res.status(400).json({ error: "activity_type is required" }); return; }
+
+  const recAt = logged_at ? new Date(logged_at) : new Date();
+
+  const { rows } = await pool.query(
+    `INSERT INTO activity_logs (member_id, logged_at, activity_type, duration_minutes, calories_burned, source)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [memberId, recAt, activity_type, duration_minutes ?? null, calories_burned ?? null, source ?? 'manual']
+  );
+  res.status(201).json(rows[0]);
+});
+
+// DELETE /api/members/:id/activities/:logId
+router.delete("/members/:id/activities/:logId", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const logId = Number(req.params.logId);
+  const { rowCount } = await pool.query(
+    "DELETE FROM activity_logs WHERE id = $1 AND member_id = $2",
+    [logId, memberId]
+  );
+  if (rowCount === 0) {
+    res.status(404).json({ error: "Log not found" });
+    return;
+  }
+  res.status(204).send();
+});
+
 function todayIST() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
 }
@@ -191,6 +247,17 @@ router.get("/members/:id/summary", async (req, res) => {
     if (log.fiber_g) totalFiber += Number(log.fiber_g);
   }
 
+  const { rows: activities } = await pool.query(
+    `SELECT calories_burned FROM activity_logs 
+     WHERE member_id = $1 AND DATE(logged_at AT TIME ZONE 'Asia/Kolkata') = $2`,
+    [memberId, date]
+  );
+  
+  let totalCaloriesBurned = 0;
+  for (const act of activities) {
+    if (act.calories_burned) totalCaloriesBurned += Number(act.calories_burned);
+  }
+
   res.json({
     date,
     total_kcal: totalKcal,
@@ -198,6 +265,7 @@ router.get("/members/:id/summary", async (req, res) => {
     total_carbs_g: totalCarb,
     total_fat_g: totalFat,
     total_fiber_g: totalFiber,
+    total_calories_burned_kcal: totalCaloriesBurned,
     items: logs
   });
 });

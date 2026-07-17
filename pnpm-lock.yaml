@@ -220,6 +220,9 @@ importers:
       '@capacitor/push-notifications':
         specifier: ^8.1.1
         version: 8.1.1(@capacitor/core@8.4.1)
+      '@capgo/capacitor-health':
+        specifier: ^8.9.3
+        version: 8.9.3(@capacitor/core@8.4.1)
       html5-qrcode:
         specifier: ^2.3.8
         version: 2.3.8
@@ -661,6 +664,11 @@ packages:
 
   '@capacitor/push-notifications@8.1.1':
     resolution: {integrity: sha512-WqzjPKIbYbARMN+GC0XMAJcxJpUUzqgzS/Ny8RODLrro38pQhm3GXYwX2Mwd+LZlLY39rGImkCkrKyQSNfuikA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@capgo/capacitor-health@8.9.3':
+    resolution: {integrity: sha512-kckynmTrsw0on0cO6cMlKFk5a/hme3sHBXeop7ZTE3nC2De3tvWcNJvIupTh/8fyTc8/Y1jIgJLnYLwWjp2wIg==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -5399,6 +5407,10 @@ snapshots:
       '@capacitor/core': 8.4.1
 
   '@capacitor/push-notifications@8.1.1(@capacitor/core@8.4.1)':
+    dependencies:
+      '@capacitor/core': 8.4.1
+
+  '@capgo/capacitor-health@8.9.3(@capacitor/core@8.4.1)':
     dependencies:
       '@capacitor/core': 8.4.1
 
