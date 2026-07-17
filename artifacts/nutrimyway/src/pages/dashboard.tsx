@@ -1,4 +1,4 @@
-import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey } from "@workspace/api-client-react";
+import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
 import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2 } from "lucide-react";
@@ -85,6 +85,7 @@ export function Dashboard() {
 
   const { data: member } = useGetMember(memberId!, { query: { enabled: !!memberId, queryKey: getGetMemberQueryKey(memberId!) } });
   const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetDailySummaryQueryKey(memberId!, { date: TODAY }) } });
+  const { data: logs } = useGetConsumptionLogs(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetConsumptionLogsQueryKey(memberId!, { date: TODAY }) } });
 
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [waterLogs, setWaterLogs] = useState<any[]>([]);
@@ -308,7 +309,7 @@ export function Dashboard() {
           
           <div className="space-y-4">
             {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
-              const items = daily?.logs_by_slot?.[slot] || [];
+              const items = logs?.filter(l => l.meal_slot.toLowerCase() === slot) || [];
               return (
                 <div key={slot} className="border-t pt-3 first:border-0 first:pt-0">
                   <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{slot}</h4>
