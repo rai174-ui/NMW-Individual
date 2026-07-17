@@ -123,6 +123,7 @@ export function Log() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(MEMBER_ID!, { date: todayLocal() }) });
+          queryClient.invalidateQueries({ queryKey: getGetConsumptionLogsQueryKey(MEMBER_ID!, { date: todayLocal() }) });
           refetchLogs();
           toast({ title: "Meal logged!" });
           setFoodItem("");
@@ -149,9 +150,10 @@ export function Log() {
     try {
       const res = await apiFetch(`/members/${MEMBER_ID}/consumption/${logId}`, { method: "DELETE" });
       if (res.ok) {
-        toast({ title: "Meal deleted" });
         queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(MEMBER_ID!, { date: todayLocal() }) });
+        queryClient.invalidateQueries({ queryKey: getGetConsumptionLogsQueryKey(MEMBER_ID!, { date: todayLocal() }) });
         refetchLogs();
+        toast({ title: "Meal removed" });
       }
     } catch (error: any) {
       toast({ title: "Error deleting meal", description: error.message, variant: "destructive" });
