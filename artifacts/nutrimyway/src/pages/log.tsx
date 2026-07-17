@@ -1,14 +1,15 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft } from "lucide-react";
-import { useCreateConsumptionLog, getGetDailySummaryQueryKey } from "@workspace/api-client-react";
+import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft, Trash2 } from "lucide-react";
+import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { native, snapPhoto } from "@/lib/capacitor";
 import { apiFetch } from "@/lib/api-base";
-import { format, parseISO, isValid } from "date-fns";
+import { format, parseISO, isValid, isToday } from "date-fns";
 import { Link } from "wouter";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function todayLocal() { return new Date().toLocaleDateString("en-CA"); }
 
@@ -63,10 +64,19 @@ export function Log() {
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const createLog = useCreateConsumptionLog();
+  const { data: logs, refetch: refetchLogs } = useGetConsumptionLogs(
+    MEMBER_ID!, 
+    undefined, 
+    { query: { enabled: !!MEMBER_ID, queryKey: getGetConsumptionLogsQueryKey(MEMBER_ID!) } }
+  );
 
   const handleSave = async () => {
-    if (!foodItem.trim()) return;
+    if (!foodItem.trim() || isSaving) return;
+    setIsSaving(true);
+    
     const kcal = customKcal !== "" ? Number(customKcal) : null;
     const protein = customProtein !== "" ? Number(customProtein) : null;
     const fiber = customFiber !== "" ? Number(customFiber) : null;
@@ -109,6 +119,7 @@ export function Log() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(MEMBER_ID!, { date: todayLocal() }) });
+          refetchLogs();
           toast({ title: "Meal logged!" });
           setFoodItem("");
           setCustomKcal("");
@@ -121,9 +132,26 @@ export function Log() {
         onError: () => {
           setPendingPhoto(null);
           if (photoPreviewUrl) { URL.revokeObjectURL(photoPreviewUrl); setPhotoPreviewUrl(null); }
+        },
+        onSettled: () => {
+          setIsSaving(false);
         }
       }
     );
+  };
+
+  const handleDelete = async (logId: number) => {
+    if (!window.confirm("Are you sure you want to delete this meal?")) return;
+    try {
+      const res = await apiFetch(`/members/${MEMBER_ID}/consumption/${logId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast({ title: "Meal deleted" });
+        queryClient.invalidateQueries({ queryKey: getGetDailySummaryQueryKey(MEMBER_ID!, { date: todayLocal() }) });
+        refetchLogs();
+      }
+    } catch (error: any) {
+      toast({ title: "Error deleting meal", description: error.message, variant: "destructive" });
+    }
   };
 
   function handleCameraClick() {
@@ -219,7 +247,14 @@ export function Log() {
         />
       </header>
 
-      <div className="p-4 space-y-6 max-w-lg mx-auto">
+      <div className="p-4 max-w-lg mx-auto">
+        <Tabs defaultValue="log" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="log">Log Meal</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="log" className="space-y-6 outline-none">
         {/* Meal Slot Picker */}
         <section>
           <h2 className="text-sm font-semibold mb-3">When did you eat?</h2>
@@ -327,13 +362,45 @@ export function Log() {
           </div>
 
           <button
-            disabled={createLog.isPending || !foodItem.trim()}
+            disabled={createLog.isPending || isSaving || !foodItem.trim()}
             onClick={handleSave}
             className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 text-lg shadow-sm"
           >
-            {createLog.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Meal"}
+            {createLog.isPending || isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Meal"}
+            {isSaving && "Saving..."}
           </button>
         </section>
+        </TabsContent>
+        <TabsContent value="history" className="mt-4 outline-none">
+          <div className="space-y-3 pb-8">
+            {logs?.length === 0 ? (
+              <p className="text-center text-muted-foreground mt-8 text-sm">No meals logged yet.</p>
+            ) : (
+              logs?.map((log) => (
+                <div key={log.id} className="bg-card border shadow-sm rounded-xl p-4 flex justify-between items-center">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wider">{log.meal_slot}</span>
+                      <span className="text-xs text-muted-foreground">{safeFormat(log.logged_at, "h:mm a")}</span>
+                    </div>
+                    <p className="font-bold text-foreground truncate text-sm">{log.food_item}</p>
+                    <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
+                      {log.calories_kcal != null && <span>{log.calories_kcal} kcal</span>}
+                      {log.protein_g != null && <span>{log.protein_g}g protein</span>}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => handleDelete(log.id)}
+                    className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

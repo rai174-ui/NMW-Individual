@@ -1,7 +1,8 @@
 import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
-import { Plus, Minus, LogOut, Utensils, HeartPulse, User } from "lucide-react";
+import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2 } from "lucide-react";
+import { getProgressColorClass, cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -20,7 +21,7 @@ function todayLocal() { return new Date().toLocaleDateString("en-CA"); }
 const TODAY = todayLocal();
 
 // -- Progress Ring ----------------------------------------------------------
-function ProgressRing({ value, max, label, color, size = 120, strokeWidth = 8, unit = "" }: any) {
+function ProgressRing({ value, max, label, color, colorClass, size = 120, strokeWidth = 8, unit = "" }: any) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
@@ -37,9 +38,9 @@ function ProgressRing({ value, max, label, color, size = 120, strokeWidth = 8, u
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
           strokeWidth={strokeWidth}
-          stroke={color}
+          stroke={colorClass ? undefined : color}
           strokeLinecap="round"
-          className="fill-none drop-shadow-sm"
+          className={cn("fill-none drop-shadow-sm", colorClass)}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1, ease: "easeOut" }}
@@ -196,7 +197,7 @@ export function Dashboard() {
                 value={macros.total_kcal}
                 max={member?.daily_kcal || 2000}
                 label="KCAL"
-                color="hsl(var(--primary))"
+                colorClass={getProgressColorClass(macros.total_kcal ?? 0, member?.daily_kcal || 2000, "stroke-primary")}
                 size={140}
                 strokeWidth={10}
               />
@@ -222,15 +223,21 @@ export function Dashboard() {
         <div className="flex gap-2">
           <div className="flex-1 bg-primary/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-primary tracking-wider">PROTEIN</span>
-            <span className="text-sm font-bold text-primary mt-0.5">{Math.round(macros.total_protein_g ?? 0)}<span className="text-xs text-primary/70">/{member?.target_protein_g || 100}g</span></span>
+            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(macros.total_protein_g ?? 0, member?.target_protein_g || 100, "text-primary"))}>
+              {Math.round(macros.total_protein_g ?? 0)}<span className="text-xs opacity-70">/{member?.target_protein_g || 100}g</span>
+            </span>
           </div>
           <div className="flex-1 bg-indigo-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-indigo-600 tracking-wider">FIBER</span>
-            <span className="text-sm font-bold text-indigo-600 mt-0.5">{Math.round(macros.total_fiber_g ?? 0)}<span className="text-xs text-indigo-600/70">/{member?.target_fiber_g || 30}g</span></span>
+            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-indigo-600"))}>
+              {Math.round(macros.total_fiber_g ?? 0)}<span className="text-xs opacity-70">/{member?.target_fiber_g || 30}g</span>
+            </span>
           </div>
           <div className="flex-1 bg-indigo-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
             <span className="text-[10px] font-bold text-indigo-600 tracking-wider">WATER</span>
-            <span className="text-sm font-bold text-indigo-600 mt-0.5">{totalWater}<span className="text-xs text-indigo-600/70">/{member?.target_water_ml || 2000}ml</span></span>
+            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-indigo-600"))}>
+              {totalWater}<span className="text-xs opacity-70">/{member?.target_water_ml || 2000}ml</span>
+            </span>
           </div>
         </div>
 
@@ -253,12 +260,17 @@ export function Dashboard() {
             >
               <Minus className="w-4 h-4" />
             </button>
-            <button 
-              onClick={() => handleAddWater(250)} 
+            <button
+              onClick={() => handleAddWater(250)}
               disabled={addingWater}
-              className="h-10 px-4 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
+              className="px-4 py-2 bg-indigo-500 text-white rounded-full text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-transform disabled:opacity-50 min-w-[100px] justify-center"
             >
-              <Plus className="w-4 h-4" /> Glass
+              {addingWater ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              {addingWater ? "Adding..." : "Glass"}
             </button>
           </div>
         </section>
