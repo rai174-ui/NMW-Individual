@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useGetActivities, getGetActivitiesQueryKey } from "@workspace/api-client-react";
 import { Activity, Plus, RefreshCw, Trash2, Loader2, Flame } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { syncActivities } from "@/lib/activity-sync";
 import { useToast } from "@/hooks/use-toast";
@@ -29,18 +29,20 @@ export function Activities() {
   const [syncingActivities, setSyncingActivities] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const handleSyncActivities = async () => {
+  const handleSyncActivities = async (silent = false) => {
     if (!memberId) return;
     setSyncingActivities(true);
     try {
       const success = await syncActivities(memberId);
       if (success) {
-        toast({
-          title: "Activities Synced",
-          description: "Successfully fetched data from Health Connect / HealthKit.",
-        });
+        if (!silent) {
+          toast({
+            title: "Activities Synced",
+            description: "Successfully fetched data from Health Connect / HealthKit.",
+          });
+        }
         queryClient.invalidateQueries({ queryKey: getGetActivitiesQueryKey(memberId, { date: today }) });
-      } else {
+      } else if (!silent) {
         toast({
           variant: "destructive",
           title: "Sync Failed",
@@ -48,11 +50,23 @@ export function Activities() {
         });
       }
     } catch (error) {
-      console.error(error);
+      if (!silent) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An unexpected error occurred during sync.",
+        });
+      }
     } finally {
       setSyncingActivities(false);
     }
   };
+
+  useEffect(() => {
+    if (memberId) {
+      handleSyncActivities(true);
+    }
+  }, [memberId]);
 
   const handleDeleteActivity = async (activityId: number) => {
     if (!memberId) return;
@@ -115,7 +129,7 @@ export function Activities() {
           <div className="flex gap-2">
             {Capacitor.isNativePlatform() && (
               <button 
-                onClick={handleSyncActivities} 
+                onClick={() => handleSyncActivities(false)} 
                 disabled={syncingActivities}
                 className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors disabled:opacity-50"
                 title="Sync Health Data"

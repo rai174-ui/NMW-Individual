@@ -1,7 +1,7 @@
 import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "in.nutrimyway.app",
+  appId: "in.nutrimyway.solo",
   appName: "NMW-Solo",
   webDir: "dist/public",
   server: {

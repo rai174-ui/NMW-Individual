@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">NMW-Solo</string>
     <string name="title_activity_main">NMW-Solo</string>
-    <string name="package_name">in.nutrimyway.app</string>
-    <string name="custom_url_scheme">in.nutrimyway.app</string>
+    <string name="package_name">in.nutrimyway.solo</string>
+    <string name="custom_url_scheme">in.nutrimyway.solo</string>
 </resources>

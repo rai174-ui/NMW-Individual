@@ -1,4 +1,4 @@
-package in.nutrimyway.app;
+package in.nutrimyway.solo;
 
 import com.getcapacitor.BridgeActivity;
 

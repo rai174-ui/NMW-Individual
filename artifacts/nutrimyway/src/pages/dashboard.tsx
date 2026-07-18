@@ -1,7 +1,7 @@
 import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetActivities, getGetActivitiesQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
-import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Activity, Droplet, RefreshCw } from "lucide-react";
+import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Activity, Droplet, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { getProgressColorClass, cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,31 +21,57 @@ function todayLocal() { return new Date().toLocaleDateString("en-CA"); }
 const TODAY = todayLocal();
 
 // -- Progress Ring ----------------------------------------------------------
-function ProgressRing({ value, max, label, color, colorClass, size = 120, strokeWidth = 8, unit = "" }: any) {
+function ProgressRing({ 
+  value, max, label, color, colorClass, 
+  secondaryValue, secondaryMax, secondaryColorClass,
+  size = 120, strokeWidth = 8, unit = "" 
+}: any) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - pct * circumference;
 
+  const hasSecondary = secondaryValue !== undefined && secondaryMax !== undefined;
+  
+  // For stacked ring, we use the same radius
+  const remainingPct = Math.max(0, 1 - pct);
+  const pct2 = (hasSecondary && secondaryMax > 0) ? Math.min(secondaryValue / secondaryMax, remainingPct) : 0;
+  const offset2 = circumference - pct2 * circumference;
+  const rotationDeg = pct * 360;
+
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="rotate-[-90deg]">
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          strokeWidth={strokeWidth}
-          className="stroke-muted/40 fill-none"
-        />
+        <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} className="stroke-muted/40 fill-none" />
+        
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
           strokeWidth={strokeWidth}
           stroke={colorClass ? undefined : color}
-          strokeLinecap="round"
+          strokeLinecap={hasSecondary && pct2 > 0 ? "butt" : "round"}
           className={cn("fill-none drop-shadow-sm", colorClass)}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1, ease: "easeOut" }}
           style={{ strokeDasharray: circumference }}
         />
+        
+        {hasSecondary && pct2 > 0 && (
+          <motion.circle
+            cx={size / 2} cy={size / 2} r={radius}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            className={cn("fill-none drop-shadow-sm", secondaryColorClass)}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset2 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            style={{ 
+              strokeDasharray: circumference,
+              transformOrigin: 'center',
+              transform: `rotate(${rotationDeg}deg)`
+            }}
+          />
+        )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-xl font-bold tracking-tight text-foreground">
@@ -92,6 +118,7 @@ export function Dashboard() {
   const [waterLogs, setWaterLogs] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [addingWater, setAddingWater] = useState(false);
+  const [mealsExpanded, setMealsExpanded] = useState(true);
   const { toast } = useToast();
 
   const fetchRecords = useCallback(() => {
@@ -205,15 +232,12 @@ export function Dashboard() {
                 max={adjustedTarget}
                 label="KCAL"
                 colorClass={getProgressColorClass(macros.total_kcal ?? 0, adjustedTarget, "stroke-primary")}
+                secondaryValue={burned}
+                secondaryMax={adjustedTarget}
+                secondaryColorClass="stroke-orange-500"
                 size={140}
                 strokeWidth={10}
               />
-              {burned > 0 && (
-                <div className="mt-2 text-[10px] font-medium text-muted-foreground flex items-center gap-1 bg-muted/30 px-2 py-0.5 rounded-full">
-                  <Activity className="w-3 h-3 text-primary/70" />
-                  <span>{baseTarget} + {burned}</span>
-                </div>
-              )}
             </div>
             <div className="w-1/2 flex flex-col justify-center gap-3 pr-2">
               <div className="flex justify-between items-center text-sm">
@@ -225,6 +249,22 @@ export function Dashboard() {
                 <span className="font-bold">{Math.round(macros.total_fiber_g ?? 0)}g</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Calories Burnt Today Card */}
+        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <Activity className="w-6 h-6 text-orange-500" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground text-base">Calories Burnt Today</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">From physical activities</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-black text-orange-500">{burned} <span className="text-sm font-bold opacity-80">kcal</span></span>
           </div>
         </section>
 
@@ -309,52 +349,55 @@ export function Dashboard() {
 
         {/* Today's Meals */}
         <section className="bg-card border shadow-sm rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-foreground flex items-center gap-2">
-              <Utensils className="w-4 h-4 text-primary" />
-              TODAY'S MEALS
-            </h3>
-            <Link href="/log" className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <button 
+              onClick={() => setMealsExpanded(!mealsExpanded)}
+              className="flex items-center gap-2 flex-1 outline-none"
+            >
+              <h3 className="font-bold text-foreground flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-primary" />
+                TODAY'S MEALS
+              </h3>
+              {mealsExpanded ? (
+                <ChevronUp className="w-4 h-4 text-muted-foreground ml-1" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-muted-foreground ml-1" />
+              )}
+            </button>
+            <Link href="/log" className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors ml-2">
               <Plus className="w-5 h-5" />
             </Link>
           </div>
           
-          <div className="space-y-4">
-            {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
-              const items = logs?.filter(l => l.meal_slot.toLowerCase() === slot) || [];
-              return (
-                <div key={slot} className="border-t pt-3 first:border-0 first:pt-0">
-                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{slot}</h4>
-                  {items.length > 0 ? (
-                    <div className="space-y-2">
-                      {items.map(item => (
-                        <div key={item.id} className="flex justify-between items-center text-sm">
-                          <span className="text-foreground">{item.food_item}</span>
-                          <span className="text-muted-foreground">{item.calories_kcal} kcal</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-[10px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-6">Nothing Logged</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Calories Burnt Today */}
-        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-orange-500" />
+          <motion.div 
+            initial={false}
+            animate={{ height: mealsExpanded ? "auto" : 0, opacity: mealsExpanded ? 1 : 0 }}
+            className="overflow-hidden"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className="space-y-4 pt-2">
+              {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
+                const items = logs?.filter(l => l.meal_slot.toLowerCase() === slot) || [];
+                return (
+                  <div key={slot} className="border-t pt-3 first:border-0 first:pt-0">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{slot}</h4>
+                    {items.length > 0 ? (
+                      <div className="space-y-2">
+                        {items.map(item => (
+                          <div key={item.id} className="flex justify-between items-center text-sm">
+                            <span className="text-foreground">{item.food_item}</span>
+                            <span className="text-muted-foreground">{item.calories_kcal} kcal</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-6">Nothing Logged</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <h3 className="font-bold text-foreground">Calories Burnt Today</h3>
-              <p className="text-xs text-muted-foreground">From physical activities</p>
-            </div>
-          </div>
-          <div className="text-lg font-black text-orange-500">{burned} <span className="text-sm font-bold opacity-70">kcal</span></div>
+          </motion.div>
         </section>
 
       </main>

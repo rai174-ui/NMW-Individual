@@ -8,11 +8,16 @@ import { apiFetch } from "@/lib/api-base";
 
 async function apiRequest(method: string, path: string, body?: any) {
   const cleanPath = path.startsWith('/api') ? path.slice(4) : path;
-  return await apiFetch(cleanPath, {
+  const res = await apiFetch(cleanPath, {
     method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `HTTP error ${res.status}`);
+  }
+  return res;
 }
 
 export function Login() {
