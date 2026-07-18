@@ -22,7 +22,7 @@ const TODAY = todayLocal();
 
 // -- Progress Ring ----------------------------------------------------------
 function ProgressRing({ 
-  value, max, label, color, colorClass, 
+  value, max, baseMax, secondaryMax, label, color, colorClass, 
   size = 120, strokeWidth = 8, unit = "" 
 }: any) {
   const radius = (size - strokeWidth) / 2;
@@ -30,21 +30,52 @@ function ProgressRing({
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - pct * circumference;
 
+  let stop1 = "#d8b4fe"; // purple-300
+  let stop2 = "#a855f7"; // purple-500
+  if (pct >= 1.0) {
+    stop1 = "#ea580c"; // orange-600
+    stop2 = "#991b1b"; // red-800
+  } else if (pct >= 0.85) {
+    stop1 = "#a855f7"; // purple-500
+    stop2 = "#ea580c"; // orange-600
+  } else if (pct >= 0.5) {
+    stop1 = "#c084fc"; // purple-400
+    stop2 = "#7e22ce"; // purple-700
+  }
+
+  const basePct = (baseMax && max > 0) ? baseMax / max : 1;
+  const baseOffset = circumference - basePct * circumference;
+  
+  const secPct = (secondaryMax && max > 0) ? secondaryMax / max : 0;
+  const secOffset = circumference - secPct * circumference;
+
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="rotate-[-90deg]">
         <defs>
-          <linearGradient id="purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#d8b4fe" /> {/* light purple */}
-            <stop offset="100%" stopColor="#7e22ce" /> {/* dark purple */}
+          <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={stop1} />
+            <stop offset="100%" stopColor={stop2} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} className="stroke-muted/40 fill-none" />
+        {baseMax !== undefined && secondaryMax !== undefined ? (
+          <>
+            <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
+                    className="stroke-purple-100 dark:stroke-purple-900/40 fill-none" 
+                    strokeDasharray={circumference} strokeDashoffset={baseOffset} />
+            <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
+                    className="stroke-orange-100 dark:stroke-orange-900/40 fill-none" 
+                    strokeDasharray={circumference} strokeDashoffset={secOffset} 
+                    style={{ transformOrigin: 'center', transform: `rotate(${basePct * 360}deg)` }} />
+          </>
+        ) : (
+          <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} className="stroke-muted/40 fill-none" />
+        )}
         
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
           strokeWidth={strokeWidth}
-          stroke="url(#purple-gradient)"
+          stroke="url(#progress-gradient)"
           strokeLinecap="round"
           className="fill-none drop-shadow-sm"
           initial={{ strokeDashoffset: circumference }}
@@ -59,6 +90,11 @@ function ProgressRing({
           {unit && <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>}
         </span>
         {label && <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mt-0.5">{label}</span>}
+        {baseMax !== undefined && secondaryMax !== undefined && (
+          <span className="text-[9px] font-semibold text-muted-foreground mt-1 whitespace-nowrap">
+            Target: {baseMax} + {secondaryMax}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -210,6 +246,8 @@ export function Dashboard() {
               <ProgressRing
                 value={macros.total_kcal}
                 max={adjustedTarget}
+                baseMax={baseTarget}
+                secondaryMax={burned}
                 label="KCAL"
                 size={140}
                 strokeWidth={10}
