@@ -11,6 +11,8 @@ import { Health } from "@/pages/health";
 import { Activities } from "@/pages/activities";
 import { Login } from "@/pages/login";
 import { About } from "@/pages/about";
+import { Admin } from "@/pages/admin";
+import { SyncGuide } from "@/pages/sync-guide";
 import { Home } from "@/pages/home";
 import { Privacy } from "@/pages/privacy";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
@@ -96,7 +98,9 @@ function ProtectedRouter() {
         <Route path="/log" component={Log} />
         <Route path="/activities" component={Activities} />
         <Route path="/health" component={Health} />
+        <Route path="/sync-guide" component={SyncGuide} />
         <Route path="/profile" component={Profile} />
+        <Route path="/admin" component={Admin} />
         <Route path="/about" component={About} />
         <Route component={NotFound} />
       </Switch>

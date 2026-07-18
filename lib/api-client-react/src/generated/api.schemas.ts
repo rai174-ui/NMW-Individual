@@ -44,6 +44,8 @@ export interface Member {
   dob?: string | null;
   /** @nullable */
   age_at_joining?: number | null;
+  /** @nullable */
+  is_admin?: boolean;
 }
 
 export interface MemberStatus {
@@ -292,3 +294,19 @@ export type GetBomItemsParams = {
 plan?: string;
 };
 
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  mobile?: string;
+  is_admin: boolean;
+  valid_until: string;
+  date_of_joining: string;
+  last_active?: string;
+}
+
+export interface AdminDashboardResponse {
+  total_users: number;
+  active_today: number;
+  premium_users: number;
+}

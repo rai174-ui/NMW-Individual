@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 export async function syncActivities(memberId: number) {
   if (!Capacitor.isNativePlatform()) {
     console.log("Health sync is only available on native platforms.");
-    return false;
+    return { success: false, dataFound: false };
   }
 
   try {
@@ -74,12 +74,12 @@ export async function syncActivities(memberId: number) {
         calories_burned: Math.round(totalCalories),
         source: "health_connect"
       });
-      return true;
+      return { success: true, dataFound: true };
     }
     
-    return true;
+    return { success: true, dataFound: false };
   } catch (error) {
     console.error("Failed to sync activities:", error);
-    return false;
+    return { success: false, dataFound: false };
   }
 }

@@ -130,6 +130,12 @@ async function createTables(): Promise<void> {
     
     // Change height_cm to REAL
     await pool.query(`ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL USING height_cm::real;`);
+    
+    // Add is_admin column
+    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;`);
+    
+    // Promote specific user to admin if they exist
+    await pool.query(`UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`);
   } catch (e) {
     logger.warn({ err: e }, "Failed to run poor man's migration.");
   }

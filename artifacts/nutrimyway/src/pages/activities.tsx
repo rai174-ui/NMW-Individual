@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { apiFetch } from "@/lib/api-base";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
 
 export function Activities() {
   const { memberId } = useAuth();
@@ -28,18 +29,24 @@ export function Activities() {
   const [activityDrawerOpen, setActivityDrawerOpen] = useState(false);
   const [syncingActivities, setSyncingActivities] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [needsSyncFix, setNeedsSyncFix] = useState(false);
 
   const handleSyncActivities = async (silent = false) => {
     if (!memberId) return;
     setSyncingActivities(true);
     try {
-      const success = await syncActivities(memberId);
-      if (success) {
+      const result = await syncActivities(memberId);
+      if (result.success) {
         if (!silent) {
           toast({
             title: "Activities Synced",
             description: "Successfully fetched data from Health Connect / HealthKit.",
           });
+        }
+        if (!result.dataFound && (totalCaloriesBurnt === 0 || activities?.length === 0)) {
+          setNeedsSyncFix(true);
+        } else {
+          setNeedsSyncFix(false);
         }
         queryClient.invalidateQueries({ queryKey: getGetActivitiesQueryKey(memberId, { date: today }) });
       } else if (!silent) {
@@ -142,6 +149,23 @@ export function Activities() {
             </button>
           </div>
         </div>
+        
+        {needsSyncFix && (
+          <section className="bg-orange-50 border border-orange-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col gap-3">
+            <div className="flex items-start gap-2 text-orange-800">
+              <Activity className="w-5 h-5 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-sm">Not seeing your wearable data?</h3>
+                <p className="text-xs mt-1">Your smartwatch might not be configured to share data with Health Connect.</p>
+              </div>
+            </div>
+            <Link href="/sync-guide">
+              <button className="w-full bg-orange-100 text-orange-700 font-bold py-2 rounded-xl text-sm active:scale-95 transition-transform">
+                Fix Sync Issues
+              </button>
+            </Link>
+          </section>
+        )}
         
         <div className="space-y-3">
           {activities && activities.length > 0 ? (

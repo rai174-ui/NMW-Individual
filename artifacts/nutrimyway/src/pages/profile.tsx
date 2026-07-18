@@ -32,17 +32,7 @@ export function Profile() {
   const [isRenewing, setIsRenewing] = useState(false);
 
   const handleRenew = async () => {
-    setIsRenewing(true);
-    try {
-      const res = await apiFetch(`/members/${MEMBER_ID}/renew`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to renew membership");
-      toast({ title: "Membership Renewed!", description: "Your premium features have been unlocked for another 30 days." });
-      queryClient.invalidateQueries({ queryKey: getGetMemberQueryKey(MEMBER_ID!) });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setIsRenewing(false);
-    }
+    toast({ title: "Request Sent", description: "Please contact rai.174@gmail.com to process your membership renewal." });
   };
 
   const handleDeleteAccount = async () => {
@@ -112,6 +102,13 @@ export function Profile() {
               <LogOut className="w-3.5 h-3.5" />
               Logout
             </button>
+            {member?.is_admin && (
+              <Link href="/admin">
+                <button className="text-xs font-medium px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg active:scale-95 transition-transform">
+                  Admin Panel
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -174,10 +171,9 @@ export function Profile() {
           )}
           <button 
             onClick={handleRenew}
-            disabled={isRenewing}
             className="w-full text-sm font-bold bg-primary text-primary-foreground py-2.5 rounded-xl active:scale-[0.98] transition-transform"
           >
-            {isRenewing ? "Processing..." : "Renew Membership (+30 Days)"}
+            Request Renewal (+30 Days)
           </button>
         </div>
       </section>

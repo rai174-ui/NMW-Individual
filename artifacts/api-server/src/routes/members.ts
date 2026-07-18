@@ -18,7 +18,7 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }

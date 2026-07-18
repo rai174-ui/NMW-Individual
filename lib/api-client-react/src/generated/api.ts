@@ -1230,3 +1230,19 @@ export const useDeleteActivity = <TError = ErrorType<unknown>, TContext = unknow
   const mutationOptions = getDeleteActivityMutationOptions(options);
   return useMutation(mutationOptions);
 }
+
+export const getAdminDashboard = (options?: RequestInit): Promise<AdminDashboardResponse> => {
+  return customFetch<AdminDashboardResponse>(`/api/admin/dashboard`, { ...options, method: 'GET' });
+}
+
+export const getAdminUsers = (options?: RequestInit): Promise<AdminUser[]> => {
+  return customFetch<AdminUser[]>(`/api/admin/users`, { ...options, method: 'GET' });
+}
+
+export const extendAdminUser = (memberId: number, options?: RequestInit): Promise<any> => {
+  return customFetch<any>(`/api/admin/users/${memberId}/extend`, { ...options, method: 'POST' });
+}
+
+export const toggleAdminUser = (memberId: number, isAdmin: boolean, options?: RequestInit): Promise<any> => {
+  return customFetch<any>(`/api/admin/users/${memberId}/admin`, { ...options, method: 'POST', body: JSON.stringify({ is_admin: isAdmin }), headers: { 'Content-Type': 'application/json', ...options?.headers } });
+}
