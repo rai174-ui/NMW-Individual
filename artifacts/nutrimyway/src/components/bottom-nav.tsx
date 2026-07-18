@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, UtensilsCrossed, HeartPulse, User, Activity } from "lucide-react";
+import { Home, UtensilsCrossed, HeartPulse, User, Footprints } from "lucide-react";
 
 export function BottomNav() {
   const [location] = useLocation();
@@ -7,7 +7,7 @@ export function BottomNav() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/log", label: "Food Log", icon: UtensilsCrossed },
-    { href: "/activities", label: "Activities", icon: Activity },
+    { href: "/activities", label: "Activities", icon: Footprints },
     { href: "/health", label: "My Health", icon: HeartPulse },
     { href: "/profile", label: "Profile", icon: User },
   ];
