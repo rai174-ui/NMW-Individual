@@ -28,7 +28,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
   const [showAiForm, setShowAiForm] = useState(false);
 
   // AI Form state
-  const [gender, setGender] = useState("male");
+  const [gender, setGender] = useState(member?.gender || "male");
   const [ethnicity, setEthnicity] = useState("Indian");
   const [activityLevel, setActivityLevel] = useState("moderate");
 
@@ -40,9 +40,21 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
       return;
     }
     
-    if (!member?.height_cm || !member?.age_at_joining) {
+    if (!member?.height_cm || (!member?.age_at_joining && !member?.dob)) {
       toast({ title: "Missing Info", description: "Please complete your profile (height & DOB) first.", variant: "destructive" });
       return;
+    }
+    
+    // Calculate age if missing
+    let age = member?.age_at_joining;
+    if (!age && member?.dob) {
+      const birthDate = new Date(member.dob);
+      const today = new Date();
+      age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
     }
     
     setAiLoading(true);
@@ -53,7 +65,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
         activityLevel,
         weight: 70, // Needs weight from last record ideally, using 70 as fallback if no records
         height: member.height_cm,
-        age: member.age_at_joining
+        age: age || 30
       };
       
       const res = await apiFetch(`/members/${memberId}/generate-targets`, {

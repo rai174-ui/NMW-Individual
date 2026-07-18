@@ -1,6 +1,6 @@
 import { useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
-import { LogOut, Info, Activity, User, Crown, AlertTriangle } from "lucide-react";
+import { LogOut, Info, Activity, User, Crown, AlertTriangle, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -129,6 +129,13 @@ export function Profile() {
           >
             Edit Targets
           </button>
+        </div>
+        <div className="bg-primary/10 rounded-xl p-3 mb-4 flex justify-between items-center cursor-pointer active:scale-95 transition-transform" onClick={() => setTargetsDrawerOpen(true)}>
+          <div className="flex items-center gap-2 text-primary font-bold text-sm">
+            <Sparkles className="w-4 h-4" />
+            <span>Generate Optimal Targets with AI</span>
+          </div>
+          <span className="text-primary text-xs font-semibold">Start &rarr;</span>
         </div>
         <div className="bg-card border rounded-2xl p-4 shadow-sm grid grid-cols-2 gap-4">
           <div className="flex flex-col">

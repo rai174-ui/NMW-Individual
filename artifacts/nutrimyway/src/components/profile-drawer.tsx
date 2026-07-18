@@ -23,6 +23,7 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
   const [heightDisplay, setHeightDisplay] = useState(member?.height_cm?.toString() || "");
   const [mobile, setMobile] = useState(member?.mobile || "");
   const [dob, setDob] = useState(member?.dob || "");
+  const [gender, setGender] = useState(member?.gender || "");
 
   
   const [loading, setLoading] = useState(false);
@@ -39,6 +40,7 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
       }
       setMobile(member?.mobile || "");
       setDob(member?.dob || "");
+      setGender(member?.gender || "");
     }
 
   }, [open, member]);
@@ -78,6 +80,7 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
         height_cm: finalHeightCm,
         mobile: mobile || null,
         dob: dob || null,
+        gender: gender || null,
       };
 
 
@@ -166,15 +169,30 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Mobile Number</label>
-              <input
-                type="tel"
-                placeholder="e.g. +91 9876543210"
-                value={mobile}
-                onChange={e => setMobile(e.target.value)}
-                className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Mobile Number</label>
+                <input
+                  type="tel"
+                  placeholder="e.g. +91 9876543210"
+                  value={mobile}
+                  onChange={e => setMobile(e.target.value)}
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Gender</label>
+                <select
+                  value={gender}
+                  onChange={e => setGender(e.target.value)}
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg text-foreground appearance-none"
+                >
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
             </div>
           </div>
 

@@ -37,6 +37,8 @@ export interface Member {
   /** @nullable */
   target_water_ml?: number | null;
   /** @nullable */
+  gender?: string | null;
+  /** @nullable */
   valid_until?: string | null;
   /** @nullable */
   mobile?: string | null;
