@@ -391,7 +391,7 @@ export function Dashboard() {
           >
             <div className="space-y-3 pt-2">
               {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
-                const items = logs?.filter(l => l.meal_slot.toLowerCase() === slot) || [];
+                const items = Array.isArray(logs) ? logs.filter(l => l.meal_slot.toLowerCase() === slot) : [];
                 return (
                   <div key={slot} className="border-t pt-2 first:border-0 first:pt-0">
                     <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{slot}</h4>

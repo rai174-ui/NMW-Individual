@@ -392,7 +392,7 @@ export function Log() {
           <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Today's Logs</h2>
           <div className="space-y-2 pb-6">
             {slots.map(s => {
-              const slotLogs = logs?.filter(l => l.meal_slot.toLowerCase() === s.id.toLowerCase()) || [];
+              const slotLogs = Array.isArray(logs) ? logs.filter(l => l.meal_slot.toLowerCase() === s.id.toLowerCase()) : [];
               if (slotLogs.length === 0) return null;
               
               const isExpanded = expandedSlots[s.id];
