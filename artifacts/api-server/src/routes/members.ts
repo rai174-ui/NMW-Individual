@@ -427,10 +427,11 @@ router.post("/members/:id/generate-targets", async (req, res) => {
       return;
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
-      generationConfig: { responseMimeType: "application/json" }
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json", }
     });
 
     const prompt = `You are an expert nutritionist. Calculate daily macronutrient targets based on:
