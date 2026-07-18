@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Health } from '@capgo/capacitor-health';
 import { createActivity, getActivities, deleteActivity } from '@workspace/api-client-react';
+import { format } from 'date-fns';
 
 export async function syncActivities(memberId: number) {
   if (!Capacitor.isNativePlatform()) {
@@ -69,7 +70,7 @@ export async function syncActivities(memberId: number) {
       }
 
       await createActivity(memberId, {
-        activity_type: `Native Health Sync (${totalSteps} steps)`,
+        activity_type: `Calories Burnt ${format(startOfDay, "MMMM do")}`,
         calories_burned: Math.round(totalCalories),
         source: "health_connect"
       });

@@ -23,7 +23,6 @@ const TODAY = todayLocal();
 // -- Progress Ring ----------------------------------------------------------
 function ProgressRing({ 
   value, max, label, color, colorClass, 
-  secondaryValue, secondaryMax, secondaryColorClass,
   size = 120, strokeWidth = 8, unit = "" 
 }: any) {
   const radius = (size - strokeWidth) / 2;
@@ -31,47 +30,28 @@ function ProgressRing({
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - pct * circumference;
 
-  const hasSecondary = secondaryValue !== undefined && secondaryMax !== undefined;
-  
-  // For stacked ring, we use the same radius
-  const remainingPct = Math.max(0, 1 - pct);
-  const pct2 = (hasSecondary && secondaryMax > 0) ? Math.min(secondaryValue / secondaryMax, remainingPct) : 0;
-  const offset2 = circumference - pct2 * circumference;
-  const rotationDeg = pct * 360;
-
   return (
     <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="rotate-[-90deg]">
+        <defs>
+          <linearGradient id="purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#d8b4fe" /> {/* light purple */}
+            <stop offset="100%" stopColor="#7e22ce" /> {/* dark purple */}
+          </linearGradient>
+        </defs>
         <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} className="stroke-muted/40 fill-none" />
         
         <motion.circle
           cx={size / 2} cy={size / 2} r={radius}
           strokeWidth={strokeWidth}
-          stroke={colorClass ? undefined : color}
-          strokeLinecap={hasSecondary && pct2 > 0 ? "butt" : "round"}
-          className={cn("fill-none drop-shadow-sm", colorClass)}
+          stroke="url(#purple-gradient)"
+          strokeLinecap="round"
+          className="fill-none drop-shadow-sm"
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1, ease: "easeOut" }}
           style={{ strokeDasharray: circumference }}
         />
-        
-        {hasSecondary && pct2 > 0 && (
-          <motion.circle
-            cx={size / 2} cy={size / 2} r={radius}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            className={cn("fill-none drop-shadow-sm", secondaryColorClass)}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: offset2 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            style={{ 
-              strokeDasharray: circumference,
-              transformOrigin: 'center',
-              transform: `rotate(${rotationDeg}deg)`
-            }}
-          />
-        )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-xl font-bold tracking-tight text-foreground">
@@ -231,10 +211,6 @@ export function Dashboard() {
                 value={macros.total_kcal}
                 max={adjustedTarget}
                 label="KCAL"
-                colorClass={getProgressColorClass(macros.total_kcal ?? 0, adjustedTarget, "stroke-primary")}
-                secondaryValue={burned}
-                secondaryMax={adjustedTarget}
-                secondaryColorClass="stroke-orange-500"
                 size={140}
                 strokeWidth={10}
               />
