@@ -236,14 +236,14 @@ export function Log() {
 
   return (
     <div className="min-h-[100dvh] bg-muted/30 pb-24">
-      <header className="bg-card border-b px-4 py-4 sticky top-0 z-20 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="bg-card border-b px-4 py-3 sticky top-0 z-20 flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <Link href="/dashboard">
-            <button className="p-2 -ml-2 rounded-full hover:bg-muted text-muted-foreground">
+            <button className="p-1.5 -ml-1.5 rounded-full hover:bg-muted text-muted-foreground">
               <ChevronLeft className="w-5 h-5" />
             </button>
           </Link>
-          <h1 className="text-xl font-bold">Log Meal</h1>
+          <h1 className="text-lg font-bold">Log Meal</h1>
         </div>
         <div className="w-10"></div> {/* Empty space to center the title */}
         <input 
@@ -256,50 +256,50 @@ export function Log() {
         />
       </header>
 
-      <div className="p-4 max-w-lg mx-auto">
-        <div className="space-y-6">
+      <div className="p-3 max-w-lg mx-auto">
+        <div className="space-y-4">
           {/* Meal Slot Picker */}
         <section>
-          <h2 className="text-sm font-semibold mb-3">When did you eat?</h2>
+          <h2 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">When did you eat?</h2>
           <div className="grid grid-cols-4 gap-2">
             {slots.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setActiveSlot(s.id)}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ${
+                className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-200 ${
                   activeSlot === s.id 
-                    ? "bg-primary border-primary text-primary-foreground shadow-md scale-105" 
+                    ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.02]" 
                     : "bg-card border-border text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <s.icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">{s.id}</span>
+                <s.icon className="w-4 h-4 mb-1" />
+                <span className="text-[10px] font-medium">{s.id}</span>
               </button>
             ))}
           </div>
         </section>
 
         {/* Manual Entry */}
-        <section className="space-y-4">
+        <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">Custom Entry</h2>
+            <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Custom Entry</h2>
             <button 
               onClick={handleCameraClick}
               disabled={aiLoading}
-              className="px-3 py-1.5 rounded-full border border-primary text-primary flex items-center gap-1.5 active:scale-95 transition-transform bg-primary/5 text-sm font-medium"
+              className="px-3 py-1.5 rounded-full border border-primary text-primary flex items-center gap-1.5 active:scale-95 transition-transform bg-primary/5 text-xs font-medium"
             >
-              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
               Snap & Analyse
             </button>
           </div>
           
-          <div className="bg-card rounded-2xl border p-4 shadow-sm space-y-4">
+          <div className="bg-card rounded-xl border p-3 shadow-sm space-y-3">
             <input
               type="text"
               placeholder="e.g. Grilled Chicken Salad"
               value={foodItem}
               onChange={(e) => setFoodItem(e.target.value)}
-              className="w-full px-4 py-3 bg-transparent text-lg font-medium border rounded-xl focus:border-primary outline-none transition-colors"
+              className="w-full px-3 py-2 bg-transparent text-sm font-medium border rounded-lg focus:border-primary outline-none transition-colors"
             />
 
             <div className="flex gap-2">
@@ -309,9 +309,9 @@ export function Log() {
                   placeholder="0"
                   value={customKcal}
                   onChange={(e) => setCustomKcal(e.target.value)}
-                  className="w-full pl-3 pr-10 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                  className="w-full pl-2 pr-8 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">kcal</span>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">kcal</span>
               </div>
               
               <div className="relative flex-1">
@@ -320,9 +320,9 @@ export function Log() {
                   placeholder="0"
                   value={customProtein}
                   onChange={(e) => setCustomProtein(e.target.value)}
-                  className="w-full pl-3 pr-6 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                  className="w-full pl-2 pr-6 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">g</span>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">g</span>
               </div>
 
               <div className="relative flex-1">
@@ -331,9 +331,9 @@ export function Log() {
                   placeholder="0"
                   value={customFiber}
                   onChange={(e) => setCustomFiber(e.target.value)}
-                  className="w-full pl-3 pr-6 py-3 bg-transparent border rounded-xl focus:border-primary outline-none font-medium text-base text-center"
+                  className="w-full pl-2 pr-6 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">g</span>
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">g</span>
               </div>
             </div>
 
@@ -367,36 +367,36 @@ export function Log() {
           <button
             disabled={createLog.isPending || isSaving || !foodItem.trim()}
             onClick={handleSave}
-            className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 text-lg shadow-sm"
+            className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 text-sm shadow-sm"
           >
-            {createLog.isPending || isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Meal"}
+            {createLog.isPending || isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Meal"}
             {isSaving && "Saving..."}
           </button>
         </section>
 
         {/* Today's Logged Meals (Collapsible by Category) */}
-        <section className="pt-8">
-          <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-4">Today's Logs</h2>
-          <div className="space-y-3 pb-8">
+        <section className="pt-4">
+          <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Today's Logs</h2>
+          <div className="space-y-2 pb-6">
             {slots.map(s => {
               const slotLogs = logs?.filter(l => l.meal_slot.toLowerCase() === s.id.toLowerCase()) || [];
               if (slotLogs.length === 0) return null;
               
               const isExpanded = expandedSlots[s.id];
               return (
-                <div key={s.id} className="bg-card border rounded-2xl overflow-hidden shadow-sm">
+                <div key={s.id} className="bg-card border rounded-xl overflow-hidden shadow-sm">
                   <button 
                     onClick={() => setExpandedSlots(prev => ({...prev, [s.id]: !prev[s.id]}))}
-                    className="w-full p-4 flex items-center justify-between bg-muted/20 active:bg-muted/40 transition-colors"
+                    className="w-full p-3 flex items-center justify-between bg-muted/20 active:bg-muted/40 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <s.icon className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-foreground">{s.id}</span>
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                    <div className="flex items-center gap-2">
+                      <s.icon className="w-4 h-4 text-primary" />
+                      <span className="font-bold text-sm text-foreground">{s.id}</span>
+                      <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                         {slotLogs.length} {slotLogs.length === 1 ? 'item' : 'items'}
                       </span>
                     </div>
-                    {isExpanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                   </button>
                   
                   <AnimatePresence>
@@ -407,22 +407,22 @@ export function Log() {
                         exit={{ height: 0 }}
                         className="overflow-hidden"
                       >
-                        <div className="p-3 space-y-2 border-t">
+                        <div className="p-2 space-y-2 border-t">
                           {slotLogs.map(log => (
-                            <div key={log.id} className="bg-background border rounded-xl p-3 flex justify-between items-center">
-                              <div className="flex-1 min-w-0 pr-3">
-                                <p className="font-bold text-foreground text-sm truncate">{log.food_item}</p>
-                                <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                            <div key={log.id} className="bg-background border rounded-lg p-2.5 flex justify-between items-center">
+                              <div className="flex-1 min-w-0 pr-2">
+                                <p className="font-bold text-foreground text-xs truncate">{log.food_item}</p>
+                                <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
                                   {log.calories_kcal != null && <span>{log.calories_kcal} kcal</span>}
                                   {log.protein_g != null && <span>{log.protein_g}g protein</span>}
                                 </div>
-                                <div className="text-[10px] text-muted-foreground/60 mt-1">{safeFormat(log.logged_at, "h:mm a")}</div>
+                                <div className="text-[9px] text-muted-foreground/60 mt-0.5">{safeFormat(log.logged_at, "h:mm a")}</div>
                               </div>
                               <button 
                                 onClick={() => handleDelete(log.id)}
-                                className="p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors shrink-0"
+                                className="p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors shrink-0"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           ))}
@@ -435,7 +435,7 @@ export function Log() {
             })}
             
             {logs?.length === 0 && (
-              <p className="text-center text-muted-foreground mt-4 text-sm py-8 border border-dashed rounded-2xl">No meals logged yet today.</p>
+              <p className="text-center text-muted-foreground mt-4 text-xs py-6 border border-dashed rounded-xl">No meals logged yet today.</p>
             )}
           </div>
         </section>

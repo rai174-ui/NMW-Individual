@@ -85,11 +85,11 @@ function ProgressRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-bold tracking-tight text-foreground">
+        <span className="text-lg font-bold tracking-tight text-foreground">
           {Math.round(value)}
-          {unit && <span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span>}
+          {unit && <span className="text-[10px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
         </span>
-        {label && <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mt-0.5">{label}</span>}
+        {label && <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground mt-0.5">{label}</span>}
         {baseMax !== undefined && secondaryMax !== undefined && (
           <span className="text-[9px] font-semibold text-muted-foreground mt-1 whitespace-nowrap">
             Target: {baseMax} + {secondaryMax}
@@ -214,15 +214,15 @@ export function Dashboard() {
   const adjustedTarget = baseTarget + burned;
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-20">
+    <div className="min-h-[100dvh] bg-background pb-16">
       {/* Header Profile Section */}
-      <header className="bg-card px-4 pt-12 pb-6 rounded-b-3xl shadow-sm border-b relative z-10">
+      <header className="bg-card px-4 pt-8 pb-4 rounded-b-3xl shadow-sm border-b relative z-10">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">
               {format(new Date(), "EEEE, MMMM do")}
             </p>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="text-lg font-bold tracking-tight text-foreground">
               Hi, {member?.name?.split(" ")[0] || "Guest"}
             </h1>
           </div>
@@ -235,10 +235,10 @@ export function Dashboard() {
         </div>
       </header>
 
-      <main className="px-4 -mt-2 pt-6 flex flex-col gap-6">
+      <main className="px-4 pt-4 flex flex-col gap-3">
         
         {/* Main Nutrition Card */}
-        <section className="bg-card border shadow-sm rounded-2xl p-5 relative overflow-hidden">
+        <section className="bg-card border shadow-sm rounded-2xl p-3 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
           
           <div className="flex gap-4 items-center">
@@ -249,17 +249,17 @@ export function Dashboard() {
                 baseMax={baseTarget}
                 secondaryMax={burned}
                 label="KCAL"
-                size={140}
-                strokeWidth={10}
+                size={110}
+                strokeWidth={8}
               />
             </div>
-            <div className="w-1/2 flex flex-col justify-center gap-3 pr-2">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-semibold tracking-wider text-xs">PROTEIN</span>
+            <div className="w-1/2 flex flex-col justify-center gap-2 pr-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-semibold tracking-wider text-[10px]">PROTEIN</span>
                 <span className="font-bold">{Math.round(macros.total_protein_g ?? 0)}g</span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-semibold tracking-wider text-xs">FIBER</span>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-semibold tracking-wider text-[10px]">FIBER</span>
                 <span className="font-bold">{Math.round(macros.total_fiber_g ?? 0)}g</span>
               </div>
             </div>
@@ -267,119 +267,119 @@ export function Dashboard() {
         </section>
 
         {/* Calories Burnt Today Card */}
-        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <Footprints className="w-6 h-6 text-orange-500" />
+        <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between relative overflow-hidden">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <Footprints className="w-5 h-5 text-orange-500" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground text-base">Calories Burnt Today</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">From physical activities</p>
+              <h3 className="font-bold text-foreground text-sm">Calories Burnt Today</h3>
+              <p className="text-[10px] text-muted-foreground mt-0.5">From physical activities</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-black text-orange-500">{burned} <span className="text-sm font-bold opacity-80">kcal</span></span>
+            <span className="text-lg font-black text-orange-500">{burned} <span className="text-[10px] font-bold opacity-80 uppercase">kcal</span></span>
           </div>
         </section>
 
         {/* Target Pills */}
         <div className="flex gap-2">
-          <div className="flex-1 bg-primary/10 rounded-xl p-3 flex flex-col items-center justify-center">
-            <span className="text-[10px] font-bold text-primary tracking-wider">PROTEIN</span>
-            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(macros.total_protein_g ?? 0, member?.target_protein_g || 100, "text-primary"))}>
-              {Math.round(macros.total_protein_g ?? 0)}<span className="text-xs opacity-70">/{member?.target_protein_g || 100}g</span>
+          <div className="flex-1 bg-primary/10 rounded-xl p-2 flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-primary tracking-wider">PROTEIN</span>
+            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_protein_g ?? 0, member?.target_protein_g || 100, "text-primary"))}>
+              {Math.round(macros.total_protein_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_protein_g || 100}g</span>
             </span>
           </div>
-          <div className="flex-1 bg-indigo-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
-            <span className="text-[10px] font-bold text-indigo-600 tracking-wider">FIBER</span>
-            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-indigo-600"))}>
-              {Math.round(macros.total_fiber_g ?? 0)}<span className="text-xs opacity-70">/{member?.target_fiber_g || 30}g</span>
+          <div className="flex-1 bg-indigo-500/10 rounded-xl p-2 flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-indigo-600 tracking-wider">FIBER</span>
+            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-indigo-600"))}>
+              {Math.round(macros.total_fiber_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_fiber_g || 30}g</span>
             </span>
           </div>
-          <div className="flex-1 bg-indigo-500/10 rounded-xl p-3 flex flex-col items-center justify-center">
-            <span className="text-[10px] font-bold text-indigo-600 tracking-wider">WATER</span>
-            <span className={cn("text-sm font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-indigo-600"))}>
-              {totalWater}<span className="text-xs opacity-70">/{member?.target_water_ml || 2000}ml</span>
+          <div className="flex-1 bg-indigo-500/10 rounded-xl p-2 flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-indigo-600 tracking-wider">WATER</span>
+            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-indigo-600"))}>
+              {totalWater}<span className="text-[10px] opacity-70">/{member?.target_water_ml || 2000}ml</span>
             </span>
           </div>
         </div>
 
         {/* Log Water */}
-        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-              <Droplet className="w-5 h-5 text-indigo-500 fill-indigo-500/50" />
+        <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+              <Droplet className="w-4 h-4 text-indigo-500 fill-indigo-500/50" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground">Log Water</h3>
-              <p className="text-xs text-muted-foreground">+250ml per glass</p>
+              <h3 className="font-bold text-foreground text-xs">Log Water</h3>
+              <p className="text-[10px] text-muted-foreground">+250ml per glass</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={handleSubtractWater} 
               disabled={addingWater || totalWater === 0}
-              className="w-10 h-10 rounded-full border border-indigo-200 text-indigo-500 flex items-center justify-center active:scale-95 disabled:opacity-50 bg-indigo-50/50 hover:bg-indigo-50"
+              className="w-8 h-8 rounded-full border border-indigo-200 text-indigo-500 flex items-center justify-center active:scale-95 disabled:opacity-50 bg-indigo-50/50 hover:bg-indigo-50"
             >
-              <Minus className="w-4 h-4" />
+              <Minus className="w-3 h-3" />
             </button>
             <button
               onClick={() => handleAddWater(250)}
               disabled={addingWater}
-              className="px-4 py-2 bg-indigo-500 text-white rounded-full text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-transform disabled:opacity-50 min-w-[100px] justify-center"
+              className="px-3 py-1.5 bg-indigo-500 text-white rounded-full text-[10px] uppercase tracking-wider font-bold flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-50 min-w-[70px] justify-center"
             >
               {addingWater ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3 h-3" />
               )}
-              {addingWater ? "Adding..." : "Glass"}
+              {addingWater ? "Adding" : "Glass"}
             </button>
           </div>
         </section>
 
         {/* Today's Weight Widget */}
-        <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <HeartPulse className="w-5 h-5 text-primary" />
+        <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <HeartPulse className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground">Today's Weight</h3>
+              <h3 className="font-bold text-foreground text-xs">Today's Weight</h3>
               {todayRecord ? (
-                <p className="text-xs text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat % logged'}</p>
+                <p className="text-[10px] text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat %'}</p>
               ) : (
-                <p className="text-xs text-muted-foreground">Not logged yet</p>
+                <p className="text-[10px] text-muted-foreground">Not logged yet</p>
               )}
             </div>
           </div>
           <button 
             onClick={() => setDrawerOpen(true)}
-            className="px-4 py-2 bg-muted hover:bg-muted/80 text-sm font-semibold rounded-full transition-colors"
+            className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-[10px] uppercase tracking-wider font-bold rounded-full transition-colors"
           >
             {todayRecord ? "Edit" : "Log Now"}
           </button>
         </section>
 
         {/* Today's Meals */}
-        <section className="bg-card border shadow-sm rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
+        <section className="bg-card border shadow-sm rounded-xl p-3">
+          <div className="flex items-center justify-between mb-1">
             <button 
               onClick={() => setMealsExpanded(!mealsExpanded)}
               className="flex items-center gap-2 flex-1 outline-none"
             >
-              <h3 className="font-bold text-foreground flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-primary" />
+              <h3 className="font-bold text-foreground flex items-center gap-1 text-xs">
+                <Utensils className="w-3.5 h-3.5 text-primary" />
                 TODAY'S MEALS
               </h3>
               {mealsExpanded ? (
-                <ChevronUp className="w-4 h-4 text-muted-foreground ml-1" />
+                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground ml-1" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-muted-foreground ml-1" />
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
               )}
             </button>
             <Link href="/log" className="p-1 text-primary hover:bg-primary/10 rounded-full transition-colors ml-2">
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
             </Link>
           </div>
           
@@ -389,23 +389,23 @@ export function Dashboard() {
             className="overflow-hidden"
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="space-y-4 pt-2">
+            <div className="space-y-3 pt-2">
               {["breakfast", "lunch", "snack", "dinner"].map((slot) => {
                 const items = logs?.filter(l => l.meal_slot.toLowerCase() === slot) || [];
                 return (
-                  <div key={slot} className="border-t pt-3 first:border-0 first:pt-0">
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">{slot}</h4>
+                  <div key={slot} className="border-t pt-2 first:border-0 first:pt-0">
+                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{slot}</h4>
                     {items.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {items.map(item => (
-                          <div key={item.id} className="flex justify-between items-center text-sm">
-                            <span className="text-foreground">{item.food_item}</span>
+                          <div key={item.id} className="flex justify-between items-center text-xs">
+                            <span className="text-foreground font-medium">{item.food_item}</span>
                             <span className="text-muted-foreground">{item.calories_kcal} kcal</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-[10px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-6">Nothing Logged</div>
+                      <div className="text-[9px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-4">Nothing Logged</div>
                     )}
                   </div>
                 );
