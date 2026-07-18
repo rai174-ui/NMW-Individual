@@ -209,10 +209,15 @@ export function Log() {
   }
 
   async function processImageWithAI(file: File) {
-    const buffer = await file.arrayBuffer();
-    const base64 = btoa(
-      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(',')[1]); // remove data:image/...;base64,
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
     const res = await apiFetch(`/members/${MEMBER_ID}/vision`, {
       method: "POST",
