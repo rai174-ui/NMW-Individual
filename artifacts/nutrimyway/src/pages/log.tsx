@@ -209,12 +209,15 @@ export function Log() {
   }
 
   async function processImageWithAI(file: File) {
-    const formData = new FormData();
-    formData.append("image", file);
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
 
     const res = await apiFetch(`/members/${MEMBER_ID}/vision`, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: base64, mimeType: file.type }),
     });
     
     if (!res.ok) {

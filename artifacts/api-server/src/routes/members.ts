@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "../lib/sqlite";
 import { requireMember, type MemberRequest } from "./auth";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = Router();
 router.use("/members", requireMember);
@@ -165,6 +166,54 @@ router.post("/members/:id/consumption", async (req, res) => {
      photo_url ?? null, photo_url ? new Date().toISOString() : null]
   );
   res.status(201).json(rows[0]);
+});
+
+// POST /api/members/:id/vision
+router.post("/members/:id/vision", async (req, res) => {
+  try {
+    const { image, mimeType } = req.body;
+    if (!image || !mimeType) {
+      res.status(400).json({ error: "Missing image or mimeType" });
+      return;
+    }
+    
+    if (!process.env.GEMINI_API_KEY) {
+      res.status(500).json({ error: "AI Vision is not configured on the server." });
+      return;
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
+
+    const prompt = `Analyze this image of a meal. Identify the food item and estimate its calories, protein (in grams), and fiber (in grams).
+Return ONLY a JSON object with this exact structure:
+{
+  "food_item": "Name of food",
+  "calories_kcal": 0,
+  "protein_g": 0,
+  "fiber_g": 0
+}`;
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: image,
+          mimeType: mimeType
+        }
+      }
+    ]);
+
+    const text = result.response.text();
+    const json = JSON.parse(text);
+    res.json(json);
+  } catch (err: any) {
+    console.error("AI Vision error:", err);
+    res.status(500).json({ error: "Failed to analyze image with AI" });
+  }
 });
 
 // GET /api/members/:id/activities
