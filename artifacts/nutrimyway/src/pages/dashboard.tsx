@@ -1,7 +1,7 @@
 import { useGetMember, getGetMemberQueryKey, useGetDailySummary, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetActivities, getGetActivitiesQueryKey } from "@workspace/api-client-react";
 import { format, isValid } from "date-fns";
 import { Link } from "wouter";
-import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Activity, Droplet, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Footprints, Droplet, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { getProgressColorClass, cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -270,7 +270,7 @@ export function Dashboard() {
         <section className="bg-card border shadow-sm rounded-2xl p-4 flex items-center justify-between relative overflow-hidden">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <Activity className="w-6 h-6 text-orange-500" />
+              <Footprints className="w-6 h-6 text-orange-500" />
             </div>
             <div>
               <h3 className="font-bold text-foreground text-base">Calories Burnt Today</h3>
