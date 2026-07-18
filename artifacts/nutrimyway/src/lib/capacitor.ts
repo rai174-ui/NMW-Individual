@@ -27,7 +27,7 @@ export async function snapPhoto(): Promise<string | null> {
       quality: 82,
       allowEditing: false,
       resultType: CameraResultType.Base64,
-      source: CameraSource.Camera, // Force camera instead of prompt/gallery
+      source: CameraSource.Prompt, // Prompt the user to choose camera or gallery
       width: 900,
     });
     return photo.base64String ?? null;
