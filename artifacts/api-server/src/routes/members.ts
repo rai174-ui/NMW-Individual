@@ -184,7 +184,7 @@ router.post("/members/:id/vision", async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       generationConfig: { responseMimeType: "application/json" }
     });
 
@@ -212,7 +212,7 @@ Return ONLY a JSON object with this exact structure:
     res.json(json);
   } catch (err: any) {
     console.error("AI Vision error:", err);
-    res.status(500).json({ error: "Failed to analyze image with AI" });
+    res.status(500).json({ error: "AI Vision error: " + (err.message || String(err)) });
   }
 });
 
