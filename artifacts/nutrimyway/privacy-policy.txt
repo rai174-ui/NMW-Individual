@@ -75,7 +75,7 @@
             <strong>Last Updated:</strong> July 2, 2026
         </div>
 
-        <p>Zero Limit Automation ("we", "us", or "our") operates the NutriMyWay mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.</p>
+        <p>NutriMyWay ("we", "us", or "our") operates the NutriMyWay mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App.</p>
 
         <p>By using NutriMyWay, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with our policies and practices, please do not use the App.</p>
 
@@ -156,7 +156,7 @@
         </ul>
 
         <h3>3.4 Business Transfers</h3>
-        <p>If Zero Limit Automation is involved in a merger, acquisition, or asset sale, your information may be transferred as part of that transaction. We will notify you before your information is transferred and becomes subject to a different privacy policy.</p>
+        <p>If NutriMyWay is involved in a merger, acquisition, or asset sale, your information may be transferred as part of that transaction. We will notify you before your information is transferred and becomes subject to a different privacy policy.</p>
 
         <h2>4. Data Security</h2>
         <p>We implement industry-standard security measures to protect your data:</p>
@@ -228,7 +228,7 @@
         <div class="contact-box">
             <h2>Contact Us</h2>
             <p>If you have questions about this Privacy Policy or your data, please contact:</p>
-            <p><strong>Zero Limit Automation</strong><br>
+            <p><strong>NutriMyWay</strong><br>
             Email: privacy@zerolimitautomation.com<br>
             Address: [Your Business Address]<br>
             Phone: [Your Contact Number]</p>
@@ -236,7 +236,7 @@
         </div>
 
         <p style="text-align: center; margin-top: 40px; color: #666; font-size: 14px;">
-            NutriMyWay is a product of Zero Limit Automation<br>
+            NutriMyWay is a product of NutriMyWay<br>
             All rights reserved.
         </p>
     </div>

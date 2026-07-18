@@ -103,24 +103,24 @@ export function About() {
         <motion.section {...fade} transition={{ duration: 0.4, delay: 0.15 }}>
           <div className="bg-card border border-border rounded-2xl p-5 text-center space-y-3">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Developed by</p>
-            <p className="text-lg font-bold text-foreground">Zero Limit Automation</p>
+            <p className="text-lg font-bold text-foreground">NutriMyWay</p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Application development · Business IT consulting · Process automation
+              Personalized Nutrition Tracking & AI Wellness Guidance
             </p>
             <div className="border-t border-border pt-3 space-y-2">
               <a
-                href="mailto:info@zerolimitautomation.com"
+                href="mailto:support@nutrimyway.in"
                 className="flex items-center justify-center gap-2 text-xs text-primary hover:underline"
               >
-                <Mail className="w-3.5 h-3.5" /> info@zerolimitautomation.com
+                <Mail className="w-3.5 h-3.5" /> support@nutrimyway.in
               </a>
               <a
-                href="https://zerolimitautomation.com"
+                href="https://nutrimyway.in"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 text-xs text-primary hover:underline"
               >
-                <Globe className="w-3.5 h-3.5" /> zerolimitautomation.com
+                <Globe className="w-3.5 h-3.5" /> nutrimyway.in
               </a>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function About() {
         <motion.section {...fade} transition={{ duration: 0.4, delay: 0.2 }}>
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-            <p className="text-[10px] text-muted-foreground/60">© {new Date().getFullYear()} Zero Limit Automation. All rights reserved.</p>
+            <p className="text-[10px] text-muted-foreground/60">© {new Date().getFullYear()} NutriMyWay. All rights reserved.</p>
           </div>
         </motion.section>
       </div>
