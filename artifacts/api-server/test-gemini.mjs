@@ -6,7 +6,7 @@ async function main() {
     return;
   }
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = ["gemini-3.5-flash", "gemini-3.1-pro", "gemini-3.5-pro", "gemini-3.1-flash"];
   for (const m of models) {
     try {
       console.log("Trying", m);
