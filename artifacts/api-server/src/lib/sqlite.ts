@@ -117,27 +117,24 @@ async function createTables(): Promise<void> {
   `);
   
   // Add missing columns if they don't exist (poor man's migration)
-  try {
-    await pool.query(`ALTER TABLE public.consumption_logs ADD COLUMN IF NOT EXISTS fiber_g REAL;`);
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS daily_kcal REAL;`);
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_protein_g REAL;`);
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fiber_g REAL;`);
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_water_ml REAL;`);
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS gender TEXT;`);
-    
-    await pool.query(`ALTER TABLE public.health_records DROP COLUMN IF EXISTS center_id;`);
-    await pool.query(`ALTER TABLE public.issuances DROP COLUMN IF EXISTS center_id;`);
-    
-    // Change height_cm to REAL
-    await pool.query(`ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL USING height_cm::real;`);
-    
-    // Add is_admin column
-    await pool.query(`ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;`);
-    
-    // Promote specific user to admin if they exist
-    await pool.query(`UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`);
-  } catch (e) {
-    logger.warn({ err: e }, "Failed to run poor man's migration.");
+  const migrations = [
+    `ALTER TABLE public.consumption_logs ADD COLUMN IF NOT EXISTS fiber_g REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS daily_kcal REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_protein_g REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fiber_g REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_water_ml REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS gender TEXT;`,
+    `ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL USING height_cm::real;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;`,
+    `UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`
+  ];
+
+  for (const query of migrations) {
+    try {
+      await pool.query(query);
+    } catch (e) {
+      logger.warn({ err: e, query }, "Migration step failed");
+    }
   }
 }
 
