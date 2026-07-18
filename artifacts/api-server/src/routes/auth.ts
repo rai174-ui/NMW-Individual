@@ -49,15 +49,40 @@ router.post("/auth/register", async (req, res) => {
 
   try {
     const password_hash = await bcrypt.hash(password, 10);
-    const date_of_joining = new Date().toISOString().split('T')[0];
+    
+    // Check member_history
+    const historyRes = await pool.query("SELECT first_joined_at, valid_until FROM member_history WHERE email = $1", [email.toLowerCase().trim()]);
+    const history = historyRes.rows[0];
+    
+    let date_of_joining: string;
+    let valid_until: string;
+    
+    if (history) {
+      date_of_joining = new Date(history.first_joined_at).toISOString().split('T')[0];
+      valid_until = new Date(history.valid_until).toISOString().split('T')[0];
+    } else {
+      date_of_joining = new Date().toISOString().split('T')[0];
+      const validUntilDate = new Date();
+      validUntilDate.setDate(validUntilDate.getDate() + 30);
+      valid_until = validUntilDate.toISOString().split('T')[0];
+    }
 
     const { rows } = await pool.query(
-      `INSERT INTO members (name, email, password_hash, date_of_joining, height_cm) 
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email`,
-      [name, email.toLowerCase().trim(), password_hash, date_of_joining, height_cm ?? null]
+      `INSERT INTO members (name, email, password_hash, date_of_joining, valid_until, height_cm) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, valid_until`,
+      [name, email.toLowerCase().trim(), password_hash, date_of_joining, valid_until, height_cm ?? null]
     );
 
     const member = rows[0];
+    
+    // Insert into history if fresh (so next time they don't get 30 days)
+    if (!history) {
+       await pool.query(
+         `INSERT INTO member_history (email, first_joined_at, valid_until) VALUES ($1, $2, $3)`,
+         [member.email, date_of_joining, valid_until]
+       );
+    }
+    
     const token = signToken(member.id, member.email);
     res.status(201).json({ token, member });
   } catch (err: any) {

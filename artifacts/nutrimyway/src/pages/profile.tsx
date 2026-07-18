@@ -1,9 +1,13 @@
 import { useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
 import { motion } from "framer-motion";
-import { LogOut, Info, Activity, User } from "lucide-react";
+import { LogOut, Info, Activity, User, Crown, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Link } from "wouter";
 import { useState } from "react";
+
+import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/api-base";
+
 import { TargetsDrawer } from "@/components/targets-drawer";
 import { ProfileDrawer } from "@/components/profile-drawer";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,6 +24,48 @@ export function Profile() {
 
   const handleTargetsSuccess = () => {
     queryClient.invalidateQueries({ queryKey: getGetMemberQueryKey(MEMBER_ID!) });
+  };
+
+
+  const { toast } = useToast();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRenewing, setIsRenewing] = useState(false);
+
+  const handleRenew = async () => {
+    setIsRenewing(true);
+    try {
+      const res = await apiFetch(`/members/${MEMBER_ID}/renew`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to renew membership");
+      toast({ title: "Membership Renewed!", description: "Your premium features have been unlocked for another 30 days." });
+      queryClient.invalidateQueries({ queryKey: getGetMemberQueryKey(MEMBER_ID!) });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsRenewing(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("WARNING: Are you sure you want to permanently delete your account? This action cannot be undone and all your logs will be wiped!")) return;
+    
+    setIsDeleting(true);
+    try {
+      const res = await apiFetch(`/members/${MEMBER_ID}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete account");
+      toast({ title: "Account Deleted", description: "Your data has been permanently removed." });
+      logout();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setIsDeleting(false);
+    }
+  };
+
+  const isPremium = member?.valid_until && new Date(member.valid_until) >= new Date(new Date().toISOString().split('T')[0]);
+  
+  const getDaysRemaining = () => {
+    if (!member?.valid_until) return 0;
+    const diff = new Date(member.valid_until).getTime() - new Date().getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)));
   };
 
   const getInitials = (name?: string) => {
@@ -102,6 +148,47 @@ export function Profile() {
             <span className="text-base font-bold">{member?.target_water_ml || "--"} <span className="text-xs font-normal text-muted-foreground">ml</span></span>
           </div>
         </div>
+      </section>
+
+
+      {/* Membership Section */}
+      <section className={`border rounded-2xl p-5 shadow-sm mb-6 ${isPremium ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <Crown className={`w-4 h-4 ${isPremium ? 'text-primary' : 'text-muted-foreground'}`} />
+            Membership Status
+          </h2>
+        </div>
+        <div className="flex flex-col gap-3">
+          {isPremium ? (
+            <p className="text-sm text-muted-foreground">Your premium trial is active. You have <strong className="text-foreground">{getDaysRemaining()} days</strong> remaining.</p>
+          ) : (
+            <p className="text-sm text-destructive font-medium">Your premium trial has expired. AI features are locked.</p>
+          )}
+          <button 
+            onClick={handleRenew}
+            disabled={isRenewing}
+            className="w-full text-sm font-bold bg-primary text-primary-foreground py-2.5 rounded-xl active:scale-[0.98] transition-transform"
+          >
+            {isRenewing ? "Processing..." : "Renew Membership (+30 Days)"}
+          </button>
+        </div>
+      </section>
+
+      {/* Danger Zone */}
+      <section className="bg-destructive/5 border border-destructive/20 rounded-2xl p-5 shadow-sm mb-6">
+        <h2 className="text-sm font-semibold text-destructive flex items-center gap-2 mb-2">
+          <AlertTriangle className="w-4 h-4" />
+          Danger Zone
+        </h2>
+        <p className="text-xs text-muted-foreground mb-4">Permanently delete your account and all associated health and food logs. This cannot be undone.</p>
+        <button 
+          onClick={handleDeleteAccount}
+          disabled={isDeleting}
+          className="w-full text-sm font-bold bg-destructive text-destructive-foreground py-2.5 rounded-xl active:scale-[0.98] transition-transform"
+        >
+          {isDeleting ? "Deleting..." : "Delete Account"}
+        </button>
       </section>
 
       <TargetsDrawer

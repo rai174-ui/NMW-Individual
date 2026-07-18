@@ -107,6 +107,13 @@ async function createTables(): Promise<void> {
       calories_burned REAL,
       source TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS member_history (
+      email TEXT PRIMARY KEY,
+      first_joined_at DATE NOT NULL,
+      valid_until DATE NOT NULL,
+      deleted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
   
   // Add missing columns if they don't exist (poor man's migration)
@@ -119,8 +126,11 @@ async function createTables(): Promise<void> {
     
     await pool.query(`ALTER TABLE public.health_records DROP COLUMN IF EXISTS center_id;`);
     await pool.query(`ALTER TABLE public.issuances DROP COLUMN IF EXISTS center_id;`);
+    
+    // Change height_cm to REAL
+    await pool.query(`ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL;`);
   } catch (e) {
-    logger.warn({ err: e }, "Failed to add fiber_g column. It may already exist or table is missing.");
+    logger.warn({ err: e }, "Failed to run poor man's migration.");
   }
 }
 

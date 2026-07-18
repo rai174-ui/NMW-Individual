@@ -17,31 +17,69 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
   const { memberId } = useAuth();
   const { toast } = useToast();
   
+
   const [name, setName] = useState(member?.name || "");
-  const [height, setHeight] = useState(member?.height_cm?.toString() || "");
+  const [heightUnit, setHeightUnit] = useState<"cm" | "in">("cm");
+  const [heightDisplay, setHeightDisplay] = useState(member?.height_cm?.toString() || "");
   const [mobile, setMobile] = useState(member?.mobile || "");
   const [dob, setDob] = useState(member?.dob || "");
+
   
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+
     if (open) {
       setName(member?.name || "");
-      setHeight(member?.height_cm?.toString() || "");
+      const baseHeight = member?.height_cm;
+      if (baseHeight) {
+        setHeightDisplay(heightUnit === "in" ? (baseHeight / 2.54).toFixed(1).replace(/\.0$/, "") : baseHeight.toString());
+      } else {
+        setHeightDisplay("");
+      }
       setMobile(member?.mobile || "");
       setDob(member?.dob || "");
     }
+
   }, [open, member]);
+
+
+  const handleUnitToggle = (unit: "cm" | "in") => {
+    if (unit === heightUnit) return;
+    if (heightDisplay) {
+      const val = parseFloat(heightDisplay);
+      if (!isNaN(val)) {
+        if (unit === "in") {
+          // cm to in
+          setHeightDisplay((val / 2.54).toFixed(1).replace(/\.0$/, ""));
+        } else {
+          // in to cm
+          setHeightDisplay((val * 2.54).toFixed(1).replace(/\.0$/, ""));
+        }
+      }
+    }
+    setHeightUnit(unit);
+  };
 
   const handleSave = async () => {
     setLoading(true);
     try {
+
+      let finalHeightCm = null;
+      if (heightDisplay) {
+        const val = parseFloat(heightDisplay);
+        if (!isNaN(val)) {
+          finalHeightCm = heightUnit === "in" ? val * 2.54 : val;
+        }
+      }
+
       const payload = {
         name,
-        height_cm: height ? Number(height) : null,
+        height_cm: finalHeightCm,
         mobile: mobile || null,
         dob: dob || null,
       };
+
 
       const res = await apiFetch(`/members/${memberId}/profile`, {
         method: "PUT",
@@ -88,17 +126,35 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
             </div>
             
             <div className="grid grid-cols-2 gap-4">
+
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Height (cm)</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Height</label>
+                  <div className="flex bg-muted rounded-md overflow-hidden border border-border/50 text-[10px] font-bold">
+                    <button 
+                      onClick={() => handleUnitToggle("cm")}
+                      className={`px-2 py-0.5 transition-colors ${heightUnit === "cm" ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/80'}`}
+                    >
+                      CM
+                    </button>
+                    <button 
+                      onClick={() => handleUnitToggle("in")}
+                      className={`px-2 py-0.5 transition-colors ${heightUnit === "in" ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/80'}`}
+                    >
+                      IN
+                    </button>
+                  </div>
+                </div>
                 <input
                   type="number"
                   step="any"
-                  placeholder="e.g. 175"
-                  value={height}
-                  onChange={e => setHeight(e.target.value)}
+                  placeholder={heightUnit === "cm" ? "e.g. 175" : "e.g. 68.5"}
+                  value={heightDisplay}
+                  onChange={e => setHeightDisplay(e.target.value)}
                   className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
                 />
               </div>
+
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Date of Birth</label>
                 <input

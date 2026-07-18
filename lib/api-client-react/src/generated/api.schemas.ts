@@ -36,6 +36,14 @@ export interface Member {
   target_fiber_g?: number | null;
   /** @nullable */
   target_water_ml?: number | null;
+  /** @nullable */
+  valid_until?: string | null;
+  /** @nullable */
+  mobile?: string | null;
+  /** @nullable */
+  dob?: string | null;
+  /** @nullable */
+  age_at_joining?: number | null;
 }
 
 export interface MemberStatus {

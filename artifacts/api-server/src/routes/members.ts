@@ -18,7 +18,7 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
@@ -170,6 +170,14 @@ router.post("/members/:id/consumption", async (req, res) => {
 
 // POST /api/members/:id/vision
 router.post("/members/:id/vision", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { rows } = await pool.query("SELECT valid_until FROM members WHERE id = $1", [memberId]);
+  if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
+  const validUntil = new Date(rows[0].valid_until);
+  if (validUntil < new Date()) {
+    res.status(403).json({ error: "Premium feature locked. Your trial has expired." });
+    return;
+  }
   try {
     const { image, mimeType } = req.body;
     if (!image || !mimeType) {
@@ -395,6 +403,104 @@ router.delete("/members/:id/water/latest", async (req, res) => {
   }
   res.json({ message: "Deleted latest log", deleted: rows[0] });
 });
+
+
+// POST /api/members/:id/generate-targets
+router.post("/members/:id/generate-targets", async (req, res) => {
+  const memberId = Number(req.params.id);
+  
+  // Premium Check
+  const { rows: memberRows } = await pool.query("SELECT valid_until FROM members WHERE id = $1", [memberId]);
+  if (!memberRows[0]) { res.status(404).json({ error: "Member not found" }); return; }
+  const validUntil = new Date(memberRows[0].valid_until);
+  if (validUntil < new Date()) {
+    res.status(403).json({ error: "Premium feature locked. Your trial has expired." });
+    return;
+  }
+
+  try {
+    const { gender, weight, height, age, ethnicity, activityLevel } = req.body;
+    
+    if (!process.env.GEMINI_API_KEY) {
+      res.status(500).json({ error: "AI Vision is not configured on the server." });
+      return;
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
+
+    const prompt = `You are an expert nutritionist. Calculate daily macronutrient targets based on:
+    Gender: ${gender}
+    Weight: ${weight} kg
+    Height: ${height} cm
+    Age: ${age} years
+    Ethnicity: ${ethnicity}
+    Activity Level: ${activityLevel}
+    
+    Return ONLY a JSON object with this exact structure:
+    {
+      "daily_kcal": 0,
+      "target_protein_g": 0,
+      "target_fiber_g": 0,
+      "target_water_ml": 0
+    }`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const json = JSON.parse(text);
+    res.json(json);
+  } catch (err: any) {
+    console.error("AI Macro error:", err);
+    res.status(500).json({ error: "AI error: " + (err.message || String(err)) });
+  }
+});
+
+// POST /api/members/:id/renew
+router.post("/members/:id/renew", async (req, res) => {
+  const memberId = Number(req.params.id);
+  // Extend valid_until by 30 days from now (or from existing valid_until if in future)
+  const { rows } = await pool.query("SELECT valid_until, email FROM members WHERE id = $1", [memberId]);
+  if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
+  
+  let validUntil = new Date(rows[0].valid_until);
+  const now = new Date();
+  if (validUntil < now) validUntil = now;
+  validUntil.setDate(validUntil.getDate() + 30);
+  
+  const validUntilStr = validUntil.toISOString().split('T')[0];
+  
+  await pool.query("UPDATE members SET valid_until = $1 WHERE id = $2", [validUntilStr, memberId]);
+  await pool.query("UPDATE member_history SET valid_until = $1 WHERE email = $2", [validUntilStr, rows[0].email]);
+  
+  res.json({ message: "Membership renewed", valid_until: validUntilStr });
+});
+
+// DELETE /api/members/:id
+router.delete("/members/:id", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { rows } = await pool.query("SELECT email, date_of_joining, valid_until FROM members WHERE id = $1", [memberId]);
+  if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
+  
+  const { email, date_of_joining, valid_until } = rows[0];
+  
+  await pool.query("BEGIN");
+  // Upsert into member_history
+  await pool.query(
+    `INSERT INTO member_history (email, first_joined_at, valid_until) 
+     VALUES ($1, $2, $3) 
+     ON CONFLICT (email) DO UPDATE SET valid_until = EXCLUDED.valid_until, deleted_at = NOW()`,
+    [email, date_of_joining, valid_until]
+  );
+  
+  await pool.query("DELETE FROM members WHERE id = $1", [memberId]);
+  await pool.query("COMMIT");
+  
+  res.json({ message: "Account successfully deleted" });
+});
+
 
 export default router;
 

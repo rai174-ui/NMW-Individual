@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey } from "@workspace/api-client-react";
+import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
@@ -71,6 +71,11 @@ export function Log() {
   const [isSaving, setIsSaving] = useState(false);
 
   const createLog = useCreateConsumptionLog();
+  const { data: member } = useGetMember(MEMBER_ID!, {
+    query: { enabled: !!MEMBER_ID, queryKey: getGetMemberQueryKey(MEMBER_ID!) }
+  });
+  const isPremium = member?.valid_until && new Date(member.valid_until) >= new Date(new Date().toISOString().split('T')[0]);
+
   const { data: logs, refetch: refetchLogs } = useGetConsumptionLogs(
     MEMBER_ID!, 
     { date: todayLocal() }, 
@@ -161,6 +166,10 @@ export function Log() {
   };
 
   function handleCameraClick() {
+    if (!isPremium) {
+      toast({ title: "Premium Required", description: "Your trial has expired. Renew membership to use AI Food Vision.", variant: "destructive" });
+      return;
+    }
     if (native()) {
       void handleNativeCamera();
     } else {
