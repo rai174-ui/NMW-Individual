@@ -80,6 +80,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Calories (kcal)</label>
               <input
                 type="number"
+                step="any"
                 placeholder="e.g. 2000"
                 value={kcal}
                 onChange={e => setKcal(e.target.value)}
@@ -92,6 +93,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Protein (g)</label>
                 <input
                   type="number"
+                  step="any"
                   placeholder="e.g. 150"
                   value={protein}
                   onChange={e => setProtein(e.target.value)}
@@ -102,6 +104,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Fiber (g)</label>
                 <input
                   type="number"
+                  step="any"
                   placeholder="e.g. 30"
                   value={fiber}
                   onChange={e => setFiber(e.target.value)}
@@ -114,6 +117,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Water (ml)</label>
               <input
                 type="number"
+                step="any"
                 placeholder="e.g. 3000"
                 value={water}
                 onChange={e => setWater(e.target.value)}

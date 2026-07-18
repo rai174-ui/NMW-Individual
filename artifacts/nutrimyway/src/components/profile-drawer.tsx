@@ -92,6 +92,7 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Height (cm)</label>
                 <input
                   type="number"
+                  step="any"
                   placeholder="e.g. 175"
                   value={height}
                   onChange={e => setHeight(e.target.value)}

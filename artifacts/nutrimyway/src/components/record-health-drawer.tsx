@@ -77,7 +77,7 @@ export function RecordHealthDrawer({ open, onOpenChange, existingRecord, onSucce
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Weight (kg) *</label>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 placeholder="e.g. 70.5"
                 value={weight}
                 onChange={e => setWeight(e.target.value)}
@@ -89,7 +89,7 @@ export function RecordHealthDrawer({ open, onOpenChange, existingRecord, onSucce
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Body Fat (%)</label>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 placeholder="Optional"
                 value={bodyFat}
                 onChange={e => setBodyFat(e.target.value)}
