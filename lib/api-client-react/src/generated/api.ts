@@ -41,7 +41,9 @@ import type {
   PackSize,
   RequestUploadUrl400,
   UploadUrlRequest,
-  UploadUrlResponse
+  UploadUrlResponse,
+  AdminDashboardResponse,
+  AdminUser
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';

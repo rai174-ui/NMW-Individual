@@ -95,7 +95,7 @@ export function Admin() {
                         <div className="text-xs text-slate-500">{user.email}</div>
                       </div>
                       <div className="text-right">
-                        <div className={\`text-xs font-semibold \${isValid ? 'text-emerald-600' : 'text-red-500'}\`}>
+                        <div className={`text-xs font-semibold ${isValid ? 'text-emerald-600' : 'text-red-500'}`}>
                           {isValid ? 'Valid' : 'Expired'}
                         </div>
                         <div className="text-[10px] text-muted-foreground">Until {new Date(user.valid_until).toLocaleDateString()}</div>
@@ -112,7 +112,7 @@ export function Admin() {
                       <button 
                         onClick={() => toggleAdminMutation.mutate({ memberId: user.id, isAdmin: !user.is_admin })}
                         disabled={toggleAdminMutation.isPending}
-                        className={\`flex-1 text-xs py-1.5 rounded-lg flex justify-center items-center gap-1 \${user.is_admin ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}\`}
+                        className={`flex-1 text-xs py-1.5 rounded-lg flex justify-center items-center gap-1 ${user.is_admin ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'}`}
                       >
                         {user.is_admin ? <ShieldAlert className="h-3 w-3" /> : <Check className="h-3 w-3" />} 
                         {user.is_admin ? 'Revoke Admin' : 'Make Admin'}
