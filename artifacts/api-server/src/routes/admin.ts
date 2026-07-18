@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { pool } from "../lib/sqlite";
+import { requireMember, type MemberRequest } from "./auth";
 
 const router = Router();
 
 // Middleware to check if user is admin
 const adminOnly = async (req: any, res: any, next: any) => {
-  const memberId = req.headers["x-member-id"] || req.query.memberId;
+  const memberId = req.authMemberId;
   if (!memberId) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -16,8 +17,10 @@ const adminOnly = async (req: any, res: any, next: any) => {
   next();
 };
 
+router.use("/admin", requireMember, adminOnly);
+
 // GET /api/admin/dashboard
-router.get("/admin/dashboard", adminOnly, async (req, res) => {
+router.get("/admin/dashboard", async (req, res) => {
   try {
     const totalUsers = await pool.query("SELECT COUNT(*) FROM members");
     
@@ -44,7 +47,7 @@ router.get("/admin/dashboard", adminOnly, async (req, res) => {
 });
 
 // GET /api/admin/users
-router.get("/admin/users", adminOnly, async (req, res) => {
+router.get("/admin/users", async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT id, name, email, mobile, is_admin, valid_until, date_of_joining,
@@ -59,7 +62,7 @@ router.get("/admin/users", adminOnly, async (req, res) => {
 });
 
 // POST /api/admin/users/:id/extend
-router.post("/admin/users/:id/extend", adminOnly, async (req, res) => {
+router.post("/admin/users/:id/extend", async (req, res) => {
   try {
     const memberId = Number(req.params.id);
     const { rows } = await pool.query("SELECT valid_until, email FROM members WHERE id = $1", [memberId]);
@@ -82,7 +85,7 @@ router.post("/admin/users/:id/extend", adminOnly, async (req, res) => {
 });
 
 // POST /api/admin/users/:id/admin
-router.post("/admin/users/:id/admin", adminOnly, async (req, res) => {
+router.post("/admin/users/:id/admin", async (req, res) => {
   try {
     const memberId = Number(req.params.id);
     const { is_admin } = req.body;
