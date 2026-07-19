@@ -440,13 +440,9 @@ router.post("/members/:id/generate-targets", async (req, res) => {
   const memberId = Number(req.params.id);
   
   // Premium Check
+  // Premium Check Removed for unlimited validity
   const { rows: memberRows } = await pool.query("SELECT valid_until FROM members WHERE id = $1", [memberId]);
   if (!memberRows[0]) { res.status(404).json({ error: "Member not found" }); return; }
-  const validUntil = new Date(memberRows[0].valid_until);
-  if (validUntil < new Date()) {
-    res.status(403).json({ error: "Premium feature locked. Your trial has expired." });
-    return;
-  }
 
   try {
     const { gender, weight, height, age, ethnicity, activityLevel } = req.body;
