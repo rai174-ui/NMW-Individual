@@ -30,7 +30,7 @@ export function Admin() {
   });
 
   const toggleAdminMutation = useMutation({
-    mutationFn: ({ memberId, isAdmin }: { memberId: number, isAdmin: boolean }) => toggleAdminUser(memberId, isAdmin),
+    mutationFn: ({ memberId, isAdmin }: { memberId: number, isAdmin: boolean }) => toggleAdminUser(memberId, { is_admin: isAdmin }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({ title: "Success", description: "Admin status updated." });

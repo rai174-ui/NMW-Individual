@@ -8,11 +8,13 @@ const router = Router();
 const adminOnly = async (req: any, res: any, next: any) => {
   const memberId = req.authMemberId;
   if (!memberId) {
-    return res.status(401).json({ error: "Unauthorized" });
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
   const { rows } = await pool.query("SELECT is_admin FROM members WHERE id = $1", [Number(memberId)]);
   if (!rows[0] || !rows[0].is_admin) {
-    return res.status(403).json({ error: "Forbidden: Admins only" });
+    res.status(403).json({ error: "Forbidden: Admins only" });
+    return;
   }
   next();
 };
@@ -66,7 +68,7 @@ router.post("/admin/users/:id/extend", async (req, res) => {
   try {
     const memberId = Number(req.params.id);
     const { rows } = await pool.query("SELECT valid_until, email FROM members WHERE id = $1", [memberId]);
-    if (!rows[0]) { return res.status(404).json({ error: "Member not found" }); }
+    if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
     
     let validUntil = new Date(rows[0].valid_until);
     const now = new Date();

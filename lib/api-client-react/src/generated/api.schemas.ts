@@ -41,6 +41,15 @@ export interface Member {
      * @nullable
      */
   ai_charges?: number | null;
+  /** @nullable */
+  valid_until?: string | null;
+  /** @nullable */
+  mobile?: string | null;
+  /** @nullable */
+  dob?: string | null;
+  /** @nullable */
+  age_at_joining?: number | null;
+  is_admin?: boolean;
 }
 
 export interface HistoricMeal {
@@ -172,7 +181,10 @@ export interface DailySummary {
   total_carbs_g: number;
   total_fat_g: number;
   total_fiber_g: number;
-  target_calories?: number;
+  /** @nullable */
+  total_calories_burned_kcal?: number | null;
+  /** @nullable */
+  target_calories?: number | null;
   logs_by_slot?: DailySummaryLogsBySlot;
 }
 
@@ -240,6 +252,51 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface ActivityLog {
+  id: number;
+  member_id: number;
+  /** @nullable */
+  logged_at?: string | null;
+  activity_type: string;
+  /** @nullable */
+  duration_minutes?: number | null;
+  /** @nullable */
+  calories_burned?: number | null;
+  /** @nullable */
+  source?: string | null;
+}
+
+export interface ActivityLogInput {
+  activity_type: string;
+  /** @nullable */
+  duration_minutes?: number | null;
+  /** @nullable */
+  calories_burned?: number | null;
+  /** @nullable */
+  source?: string | null;
+  /** @nullable */
+  logged_at?: string | null;
+}
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  mobile?: string | null;
+  is_admin: boolean;
+  valid_until: string;
+  date_of_joining: string;
+  /** @nullable */
+  last_active?: string | null;
+}
+
+export interface AdminDashboardResponse {
+  total_users: number;
+  active_today: number;
+  premium_users: number;
+}
+
 export type RequestUploadUrl400 = {
   error?: string;
 };
@@ -262,7 +319,18 @@ export type GetDailySummaryParams = {
 date?: string;
 };
 
+export type GetActivitiesParams = {
+/**
+ * Date filter in YYYY-MM-DD format
+ */
+date?: string;
+};
+
 export type GetBomItemsParams = {
 plan?: string;
+};
+
+export type ToggleAdminUserBody = {
+  is_admin: boolean;
 };
 

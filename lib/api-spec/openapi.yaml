@@ -270,6 +270,76 @@ paths:
               schema:
                 $ref: "#/components/schemas/DailySummary"
 
+  /members/{memberId}/activities:
+    get:
+      operationId: getActivities
+      tags: [members]
+      summary: Get member activities
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Date filter in YYYY-MM-DD format
+      responses:
+        "200":
+          description: List of activity logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityLog"
+    post:
+      operationId: createActivity
+      tags: [members]
+      summary: Create an activity log
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityLogInput"
+      responses:
+        "201":
+          description: Created activity log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityLog"
+
+  /members/{memberId}/activities/{logId}:
+    delete:
+      operationId: deleteActivity
+      tags: [members]
+      summary: Delete an activity log
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: logId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted successfully
+
   /members/{memberId}/status:
     get:
       operationId: getMemberStatus
@@ -346,6 +416,75 @@ paths:
                 items:
                   $ref: "#/components/schemas/PackSize"
 
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Get admin dashboard stats
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboardResponse"
+
+  /admin/users:
+    get:
+      operationId: getAdminUsers
+      tags: [admin]
+      summary: Get all users for admin
+      responses:
+        "200":
+          description: List of admin users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{userId}/extend:
+    post:
+      operationId: extendAdminUser
+      tags: [admin]
+      summary: Extend user validity
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Extended successfully
+
+  /admin/users/{userId}/admin:
+    post:
+      operationId: toggleAdminUser
+      tags: [admin]
+      summary: Toggle user admin status
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_admin:
+                  type: boolean
+              required:
+                - is_admin
+      responses:
+        "200":
+          description: Toggled successfully
+
 components:
   schemas:
     HealthStatus:
@@ -386,6 +525,16 @@ components:
         ai_charges:
           type: ["number", "null"]
           description: Accumulated charges for AI features
+        valid_until:
+          type: ["string", "null"]
+        mobile:
+          type: ["string", "null"]
+        dob:
+          type: ["string", "null"]
+        age_at_joining:
+          type: ["number", "null"]
+        is_admin:
+          type: boolean
       required:
         - id
         - name
@@ -571,8 +720,10 @@ components:
           type: number
         total_fiber_g:
           type: number
+        total_calories_burned_kcal:
+          type: ["number", "null"]
         target_calories:
-          type: number
+          type: ["number", "null"]
         logs_by_slot:
           type: object
           additionalProperties:
@@ -675,3 +826,82 @@ components:
           description: Normalized object path.
         metadata:
           $ref: '#/components/schemas/UploadUrlRequest'
+
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        member_id:
+          type: integer
+        logged_at:
+          type: ["string", "null"]
+        activity_type:
+          type: string
+        duration_minutes:
+          type: ["number", "null"]
+        calories_burned:
+          type: ["number", "null"]
+        source:
+          type: ["string", "null"]
+      required:
+        - id
+        - member_id
+        - activity_type
+
+    ActivityLogInput:
+      type: object
+      properties:
+        activity_type:
+          type: string
+        duration_minutes:
+          type: ["number", "null"]
+        calories_burned:
+          type: ["number", "null"]
+        source:
+          type: ["string", "null"]
+        logged_at:
+          type: ["string", "null"]
+      required:
+        - activity_type
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        mobile:
+          type: ["string", "null"]
+        is_admin:
+          type: boolean
+        valid_until:
+          type: string
+        date_of_joining:
+          type: string
+        last_active:
+          type: ["string", "null"]
+      required:
+        - id
+        - name
+        - email
+        - is_admin
+        - valid_until
+        - date_of_joining
+
+    AdminDashboardResponse:
+      type: object
+      properties:
+        total_users:
+          type: integer
+        active_today:
+          type: integer
+        premium_users:
+          type: integer
+      required:
+        - total_users
+        - active_today
+        - premium_users

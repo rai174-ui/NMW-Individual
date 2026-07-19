@@ -76,7 +76,12 @@ export const GetMemberResponse = zod.object({
   "target_protein_g": zod.number().nullish(),
   "target_fiber_g": zod.number().nullish(),
   "target_water_ml": zod.number().nullish(),
-  "ai_charges": zod.number().nullish().describe('Accumulated charges for AI features')
+  "ai_charges": zod.number().nullish().describe('Accumulated charges for AI features'),
+  "valid_until": zod.string().nullish(),
+  "mobile": zod.string().nullish(),
+  "dob": zod.string().nullish(),
+  "age_at_joining": zod.number().nullish(),
+  "is_admin": zod.boolean().optional()
 })
 
 
@@ -252,7 +257,8 @@ export const GetDailySummaryResponse = zod.object({
   "total_carbs_g": zod.number(),
   "total_fat_g": zod.number(),
   "total_fiber_g": zod.number(),
-  "target_calories": zod.number().optional(),
+  "total_calories_burned_kcal": zod.number().nullish(),
+  "target_calories": zod.number().nullish(),
   "logs_by_slot": zod.record(zod.string(), zod.array(zod.object({
   "id": zod.number(),
   "member_id": zod.number(),
@@ -268,6 +274,66 @@ export const GetDailySummaryResponse = zod.object({
   "photo_uploaded_at": zod.string().nullish()
 }))).optional()
 })
+
+
+/**
+ * @summary Get member activities
+ */
+export const GetActivitiesParams = zod.object({
+  "memberId": zod.coerce.number()
+})
+
+export const GetActivitiesQueryParams = zod.object({
+  "date": zod.coerce.string().optional()
+})
+
+export const GetActivitiesResponseItem = zod.object({
+  "id": zod.number(),
+  "member_id": zod.number(),
+  "logged_at": zod.string().nullish(),
+  "activity_type": zod.string(),
+  "duration_minutes": zod.number().nullish(),
+  "calories_burned": zod.number().nullish(),
+  "source": zod.string().nullish()
+})
+export const GetActivitiesResponse = zod.array(GetActivitiesResponseItem)
+
+
+/**
+ * @summary Create an activity log
+ */
+export const CreateActivityParams = zod.object({
+  "memberId": zod.coerce.number()
+})
+
+export const CreateActivityBody = zod.object({
+  "activity_type": zod.string(),
+  "duration_minutes": zod.number().nullish(),
+  "calories_burned": zod.number().nullish(),
+  "source": zod.string().nullish(),
+  "logged_at": zod.string().nullish()
+})
+
+export const CreateActivityResponse = zod.object({
+  "id": zod.number(),
+  "member_id": zod.number(),
+  "logged_at": zod.string().nullish(),
+  "activity_type": zod.string(),
+  "duration_minutes": zod.number().nullish(),
+  "calories_burned": zod.number().nullish(),
+  "source": zod.string().nullish()
+})
+
+
+/**
+ * @summary Delete an activity log
+ */
+export const DeleteActivityParams = zod.object({
+  "memberId": zod.coerce.number(),
+  "logId": zod.coerce.number()
+})
+
+export const DeleteActivityResponse = zod.unknown()
 
 
 /**
@@ -335,5 +401,55 @@ export const GetPackSizesResponseItem = zod.object({
   "calories_kcal": zod.number().nullish()
 })
 export const GetPackSizesResponse = zod.array(GetPackSizesResponseItem)
+
+
+/**
+ * @summary Get admin dashboard stats
+ */
+export const GetAdminDashboardResponse = zod.object({
+  "total_users": zod.number(),
+  "active_today": zod.number(),
+  "premium_users": zod.number()
+})
+
+
+/**
+ * @summary Get all users for admin
+ */
+export const GetAdminUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "mobile": zod.string().nullish(),
+  "is_admin": zod.boolean(),
+  "valid_until": zod.string(),
+  "date_of_joining": zod.string(),
+  "last_active": zod.string().nullish()
+})
+export const GetAdminUsersResponse = zod.array(GetAdminUsersResponseItem)
+
+
+/**
+ * @summary Extend user validity
+ */
+export const ExtendAdminUserParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+export const ExtendAdminUserResponse = zod.unknown()
+
+
+/**
+ * @summary Toggle user admin status
+ */
+export const ToggleAdminUserParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+export const ToggleAdminUserBody = zod.object({
+  "is_admin": zod.boolean()
+})
+
+export const ToggleAdminUserResponse = zod.unknown()
 
 
