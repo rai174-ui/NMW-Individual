@@ -184,6 +184,13 @@ router.post("/members/:id/consumption", async (req, res) => {
      protein_g ?? null, carbs_g ?? null, fat_g ?? null, fiber_g ?? null,
      photo_url ?? null, photo_url ? new Date().toISOString() : null]
   );
+
+  // Clean up logs older than 60 days
+  await pool.query(
+    `DELETE FROM consumption_logs WHERE member_id = $1 AND logged_at < NOW() - INTERVAL '60 days'`,
+    [memberId]
+  );
+
   res.status(201).json(rows[0]);
 });
 

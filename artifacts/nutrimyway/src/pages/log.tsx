@@ -331,7 +331,7 @@ export function Log() {
               className="w-full px-3 py-2 bg-transparent text-sm font-medium border rounded-lg focus:border-primary outline-none transition-colors"
             />
             <datalist id="historic-meals">
-              {historicMeals?.map((meal, idx) => (
+              {foodItem.length >= 2 && historicMeals?.map((meal, idx) => (
                 <option key={idx} value={meal.food_item} />
               ))}
             </datalist>

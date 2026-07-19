@@ -169,7 +169,7 @@ export function Profile() {
           ) : (
             <p className="text-sm text-destructive font-medium">Your premium trial has expired. AI features are locked.</p>
           )}
-          {member?.ai_charges ? (
+          {typeof member?.ai_charges === 'number' ? (
             <div className="bg-background rounded-lg p-3 border mt-1 mb-2">
               <h3 className="text-xs font-semibold text-muted-foreground mb-1">AI Charges Used</h3>
               <p className="text-xl font-bold text-foreground">₹ {(member.ai_charges * 2).toFixed(2)}</p>
