@@ -18,7 +18,7 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
@@ -145,6 +145,24 @@ router.get("/members/:id/consumption", async (req, res) => {
   }
 });
 
+// GET /api/members/:id/historic-meals
+router.get("/members/:id/historic-meals", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { rows } = await pool.query(
+    `SELECT food_item, 
+            MAX(calories_kcal) as calories_kcal, 
+            MAX(protein_g) as protein_g, 
+            MAX(fiber_g) as fiber_g
+     FROM consumption_logs 
+     WHERE member_id = $1 AND food_item IS NOT NULL AND food_item != ''
+     GROUP BY food_item 
+     ORDER BY MAX(logged_at) DESC 
+     LIMIT 50`,
+    [memberId]
+  );
+  res.json(rows);
+});
+
 // POST /api/members/:id/consumption
 router.post("/members/:id/consumption", async (req, res) => {
   const memberId = Number(req.params.id);
@@ -218,6 +236,10 @@ Return ONLY a JSON object with this exact structure:
 
     const text = result.response.text();
     const json = JSON.parse(text);
+    
+    // Increment AI charges by 0.05
+    await pool.query("UPDATE members SET ai_charges = COALESCE(ai_charges, 0) + 0.05 WHERE id = $1", [memberId]);
+    
     res.json(json);
   } catch (err: any) {
     console.error("AI Vision error:", err);
@@ -453,6 +475,10 @@ router.post("/members/:id/generate-targets", async (req, res) => {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const json = JSON.parse(text);
+    
+    // Increment AI charges by 0.05
+    await pool.query("UPDATE members SET ai_charges = COALESCE(ai_charges, 0) + 0.05 WHERE id = $1", [memberId]);
+    
     res.json(json);
   } catch (err: any) {
     console.error("AI Macro error:", err);
@@ -474,7 +500,7 @@ router.post("/members/:id/renew", async (req, res) => {
   
   const validUntilStr = validUntil.toISOString().split('T')[0];
   
-  await pool.query("UPDATE members SET valid_until = $1 WHERE id = $2", [validUntilStr, memberId]);
+  await pool.query("UPDATE members SET valid_until = $1, ai_charges = 0 WHERE id = $2", [validUntilStr, memberId]);
   await pool.query("UPDATE member_history SET valid_until = $1 WHERE email = $2", [validUntilStr, rows[0].email]);
   
   res.json({ message: "Membership renewed", valid_until: validUntilStr });

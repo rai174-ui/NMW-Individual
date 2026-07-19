@@ -52,7 +52,8 @@ async function createTables(): Promise<void> {
       dob TEXT,
       age_at_joining REAL,
       valid_until DATE,
-      is_active BOOLEAN NOT NULL DEFAULT TRUE
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      ai_charges REAL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS health_records (
@@ -124,6 +125,7 @@ async function createTables(): Promise<void> {
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fiber_g REAL;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_water_ml REAL;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS gender TEXT;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS ai_charges REAL DEFAULT 0;`,
     `ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL USING height_cm::real;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;`,
     `UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`

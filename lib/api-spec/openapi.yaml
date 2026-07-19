@@ -224,6 +224,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConsumptionLog"
 
+  /members/{memberId}/historic-meals:
+    get:
+      operationId: getHistoricMeals
+      tags: [members]
+      summary: Get unique historic meals logged by the member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of historic meals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HistoricMeal"
+
   /members/{memberId}/summary:
     get:
       operationId: getDailySummary
@@ -362,9 +383,26 @@ components:
           type: ["integer", "null"]
         target_water_ml:
           type: ["integer", "null"]
+        ai_charges:
+          type: ["number", "null"]
+          description: Accumulated charges for AI features
       required:
         - id
         - name
+
+    HistoricMeal:
+      type: object
+      properties:
+        food_item:
+          type: string
+        calories_kcal:
+          type: ["number", "null"]
+        protein_g:
+          type: ["number", "null"]
+        fiber_g:
+          type: ["number", "null"]
+      required:
+        - food_item
 
     MemberStatus:
       type: object

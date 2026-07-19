@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sunrise, Sun, Apple, Moon, Camera, Sparkles, Loader2, X, ChevronLeft, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetMember, getGetMemberQueryKey } from "@workspace/api-client-react";
+import { useCreateConsumptionLog, getGetDailySummaryQueryKey, useGetConsumptionLogs, getGetConsumptionLogsQueryKey, useGetMember, getGetMemberQueryKey, useGetHistoricMeals, getGetHistoricMealsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
@@ -80,6 +80,11 @@ export function Log() {
     MEMBER_ID!, 
     { date: todayLocal() }, 
     { query: { enabled: !!MEMBER_ID, queryKey: getGetConsumptionLogsQueryKey(MEMBER_ID!, { date: todayLocal() }) } }
+  );
+
+  const { data: historicMeals } = useGetHistoricMeals(
+    MEMBER_ID!,
+    { query: { enabled: !!MEMBER_ID, queryKey: getGetHistoricMealsQueryKey(MEMBER_ID!) } }
   );
 
   const handleSave = async () => {
@@ -309,11 +314,27 @@ export function Log() {
           <div className="bg-card rounded-xl border p-3 shadow-sm space-y-3">
             <input
               type="text"
+              list="historic-meals"
               placeholder="e.g. Grilled Chicken Salad"
               value={foodItem}
-              onChange={(e) => setFoodItem(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFoodItem(val);
+                // Autocomplete if it exactly matches a historic meal
+                const match = historicMeals?.find(m => m.food_item === val);
+                if (match) {
+                  setCustomKcal(match.calories_kcal ? String(match.calories_kcal) : "");
+                  setCustomProtein(match.protein_g ? String(match.protein_g) : "");
+                  setCustomFiber(match.fiber_g ? String(match.fiber_g) : "");
+                }
+              }}
               className="w-full px-3 py-2 bg-transparent text-sm font-medium border rounded-lg focus:border-primary outline-none transition-colors"
             />
+            <datalist id="historic-meals">
+              {historicMeals?.map((meal, idx) => (
+                <option key={idx} value={meal.food_item} />
+              ))}
+            </datalist>
 
             <div className="flex gap-2">
               <div className="relative flex-1">

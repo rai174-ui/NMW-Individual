@@ -75,7 +75,8 @@ export const GetMemberResponse = zod.object({
   "email": zod.string().nullish(),
   "target_protein_g": zod.number().nullish(),
   "target_fiber_g": zod.number().nullish(),
-  "target_water_ml": zod.number().nullish()
+  "target_water_ml": zod.number().nullish(),
+  "ai_charges": zod.number().nullish().describe('Accumulated charges for AI features')
 })
 
 
@@ -215,6 +216,22 @@ export const CreateConsumptionLogResponse = zod.object({
   "photo_url": zod.string().nullish(),
   "photo_uploaded_at": zod.string().nullish()
 })
+
+
+/**
+ * @summary Get unique historic meals logged by the member
+ */
+export const GetHistoricMealsParams = zod.object({
+  "memberId": zod.coerce.number()
+})
+
+export const GetHistoricMealsResponseItem = zod.object({
+  "food_item": zod.string(),
+  "calories_kcal": zod.number().nullish(),
+  "protein_g": zod.number().nullish(),
+  "fiber_g": zod.number().nullish()
+})
+export const GetHistoricMealsResponse = zod.array(GetHistoricMealsResponseItem)
 
 
 /**

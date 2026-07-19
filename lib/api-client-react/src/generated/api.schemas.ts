@@ -36,16 +36,21 @@ export interface Member {
   target_fiber_g?: number | null;
   /** @nullable */
   target_water_ml?: number | null;
+  /**
+     * Accumulated charges for AI features
+     * @nullable
+     */
+  ai_charges?: number | null;
+}
+
+export interface HistoricMeal {
+  food_item: string;
   /** @nullable */
-  valid_until?: string | null;
+  calories_kcal?: number | null;
   /** @nullable */
-  mobile?: string | null;
+  protein_g?: number | null;
   /** @nullable */
-  dob?: string | null;
-  /** @nullable */
-  age_at_joining?: number | null;
-  /** @nullable */
-  is_admin?: boolean;
+  fiber_g?: number | null;
 }
 
 export interface MemberStatus {
@@ -167,34 +172,8 @@ export interface DailySummary {
   total_carbs_g: number;
   total_fat_g: number;
   total_fiber_g: number;
-  total_calories_burned_kcal?: number;
   target_calories?: number;
   logs_by_slot?: DailySummaryLogsBySlot;
-}
-
-export interface ActivityLog {
-  id: number;
-  member_id: number;
-  logged_at?: string;
-  activity_type: string;
-  /** @nullable */
-  duration_minutes?: number | null;
-  /** @nullable */
-  calories_burned?: number | null;
-  /** @nullable */
-  source?: string | null;
-}
-
-export interface ActivityLogInput {
-  activity_type: string;
-  /** @nullable */
-  duration_minutes?: number | null;
-  /** @nullable */
-  calories_burned?: number | null;
-  /** @nullable */
-  source?: string | null;
-  /** @nullable */
-  logged_at?: string | null;
 }
 
 export interface BomItem {
@@ -276,13 +255,6 @@ export type GetConsumptionLogsParams = {
 date?: string;
 };
 
-export type GetActivitiesParams = {
-/**
- * Date filter in YYYY-MM-DD format
- */
-date?: string;
-};
-
 export type GetDailySummaryParams = {
 /**
  * Date in YYYY-MM-DD format
@@ -294,19 +266,3 @@ export type GetBomItemsParams = {
 plan?: string;
 };
 
-export interface AdminUser {
-  id: number;
-  name: string;
-  email: string;
-  mobile?: string;
-  is_admin: boolean;
-  valid_until: string;
-  date_of_joining: string;
-  last_active?: string;
-}
-
-export interface AdminDashboardResponse {
-  total_users: number;
-  active_today: number;
-  premium_users: number;
-}

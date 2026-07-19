@@ -169,6 +169,13 @@ export function Profile() {
           ) : (
             <p className="text-sm text-destructive font-medium">Your premium trial has expired. AI features are locked.</p>
           )}
+          {member?.ai_charges ? (
+            <div className="bg-background rounded-lg p-3 border mt-1 mb-2">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-1">AI Charges Used</h3>
+              <p className="text-xl font-bold text-foreground">₹ {(member.ai_charges * 2).toFixed(2)}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">These charges will reset upon membership renewal.</p>
+            </div>
+          ) : null}
           <button 
             onClick={handleRenew}
             className="w-full text-sm font-bold bg-primary text-primary-foreground py-2.5 rounded-xl active:scale-[0.98] transition-transform"
