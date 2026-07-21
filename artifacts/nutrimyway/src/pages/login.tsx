@@ -101,7 +101,7 @@ export function Login() {
             {(!otpSent || mode !== "reset") && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
-                <Input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                <Input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value.toLowerCase())} required />
               </div>
             )}
 
