@@ -43,31 +43,15 @@ const ALLOWED_ORIGINS = [
 ];
 
 app.use(
-  cors({
-    origin: function (origin, cb) {
-      // No origin = same-origin or server-to-server — allow
-      if (!origin) return cb(null, true);
-
-      // Allow exact matches from our list
-      if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-
-      // Allow any railway subdomain
-      if (origin.endsWith(".up.railway.app")) return cb(null, true);
-
-      // Allow local development ports (e.g., localhost:5173)
-      if (
-        origin.startsWith("http://localhost:") ||
-        origin.startsWith("https://localhost:")
-      ) {
+    cors({
+      origin: function (origin, cb) {
+        // Temporarily allow all origins to debug AAB issue
         return cb(null, true);
-      }
-
-      cb(new Error(`CORS: origin not allowed — ${origin}`));
-    },
-    credentials: true,
-    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+      },
+      credentials: true,
+      methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
 );
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
