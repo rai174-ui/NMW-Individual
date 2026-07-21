@@ -103,7 +103,7 @@ router.post("/auth/login", async (req, res) => {
     return;
   }
 
-  const { rows } = await pool.query("SELECT * FROM members WHERE email = $1", [email.toLowerCase().trim()]);
+  const { rows } = await pool.query("SELECT * FROM members WHERE LOWER(TRIM(email)) = $1", [email.toLowerCase().trim()]);
   const member = rows[0];
 
   if (!member || !(await bcrypt.compare(password, member.password_hash))) {
@@ -129,7 +129,7 @@ router.post("/auth/request-password-reset", async (req, res) => {
     return;
   }
 
-  const { rows } = await pool.query("SELECT id FROM members WHERE email = $1", [email.toLowerCase().trim()]);
+  const { rows } = await pool.query("SELECT id FROM members WHERE LOWER(TRIM(email)) = $1", [email.toLowerCase().trim()]);
   if (!rows[0]) {
     // Return success to prevent email enumeration
     res.json({ message: "If that email exists, a reset code was sent." });
@@ -154,13 +154,13 @@ router.post("/auth/request-password-reset", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "NutriMyWay <onboarding@resend.dev>",
+      from: "HealthLogix <onboarding@resend.dev>",
       to: [email],
       subject: "Password Reset Code",
       html: `<div style="font-family:sans-serif;max-width:480px;margin:auto">
         <h2 style="color:#0d9488">Password Reset Code</h2>
         <p>Use the following 6-digit code to reset your password:</p>
-        <div style="font-size:32px;font-weight:700;letter-spacing:0.2em;color:#0d9488;padding:16px 24px;background:#f0fdfa;border-radius:8px;display:inline-block;margin:8px 0">$otp</div>
+        <div style="font-size:32px;font-weight:700;letter-spacing:0.2em;color:#0d9488;padding:16px 24px;background:#f0fdfa;border-radius:8px;display:inline-block;margin:8px 0">${otp}</div>
         <p style="color:#6b7280;font-size:13px;margin-top:16px">This code expires in 15 minutes.</p>
       </div>`
     });

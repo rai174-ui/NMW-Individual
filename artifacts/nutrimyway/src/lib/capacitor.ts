@@ -48,7 +48,7 @@ export async function initPushNotifications(memberId: number, apiBase: string): 
       await PushNotifications.createChannel({
         id: "default",
         name: "General Notifications",
-        description: "General notifications for NutriMyWay",
+        description: "General notifications for HealthLogix",
         importance: 5, // High importance (shows heads-up notification)
         visibility: 1, // Public visibility
         vibration: true,
@@ -56,7 +56,7 @@ export async function initPushNotifications(memberId: number, apiBase: string): 
       await LocalNotifications.createChannel({
         id: "default",
         name: "General Notifications",
-        description: "General notifications for NutriMyWay",
+        description: "General notifications for HealthLogix",
         importance: 5,
         visibility: 1,
         vibration: true,
@@ -108,7 +108,7 @@ export async function initPushNotifications(memberId: number, apiBase: string): 
       notifications: [
         {
           id: Math.floor(Date.now() / 1000), // safe 32-bit int
-          title: notification.title || "NutriMyWay",
+          title: notification.title || "HealthLogix",
           body: notification.body || "",
           schedule: { at: new Date(Date.now() + 100) },
           channelId: "default",

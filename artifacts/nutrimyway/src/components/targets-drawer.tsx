@@ -32,7 +32,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
   const [ethnicity, setEthnicity] = useState("Indian");
   const [activityLevel, setActivityLevel] = useState("moderate");
 
-  const isPremium = member?.valid_until && new Date(member.valid_until) >= new Date(new Date().toISOString().split('T')[0]);
+  const isPremium = true;
 
   const handleAiGenerate = async () => {
     if (!isPremium) {

@@ -9,9 +9,9 @@ export function Home() {
       <header className="px-6 py-6 flex justify-between items-center max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm p-1">
-            <img src="/logo.jpg" alt="NutriMyWay Logo" className="w-full h-full object-contain" />
+            <img src="/logo.jpg" alt="HealthLogix Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-foreground">NutriMyWay</span>
+          <span className="font-bold text-xl tracking-tight text-foreground">HealthLogix</span>
         </div>
         <div className="flex items-center gap-6">
           <a
@@ -34,7 +34,7 @@ export function Home() {
           Your Personal Journey to <span className="text-primary">Better Health</span>
         </h1>
         <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-          NutriMyWay helps you track your meals, analyze your nutrition, and stay connected with your wellness center. Take control of your habits today.
+          HealthLogix helps you track your meals, analyze your nutrition, and stay connected with your wellness center. Take control of your habits today.
         </p>
 
         <button

@@ -44,7 +44,7 @@ export function Login() {
         const res = await apiRequest("POST", "/api/auth/register", { name, email, password });
         const data = await res.json();
         login(data.token, data.member.id);
-        toast({ title: "Account created", description: "Welcome to NutriMyWay!" });
+        toast({ title: "Account created", description: "Welcome to HealthLogix!" });
       } else if (mode === "login") {
         const res = await apiRequest("POST", "/api/auth/login", { email, password });
         const data = await res.json();
@@ -77,7 +77,7 @@ export function Login() {
       <Card className="w-full max-w-md card-shadow-none sm:shadow-sm">
         <CardHeader>
           <div className="flex justify-center mb-2">
-            <img src="/logo.jpg" alt="NutriMyWay Logo" className="h-16 w-auto drop-shadow-sm" />
+            <img src="/logo.jpg" alt="HealthLogix Logo" className="h-16 w-auto drop-shadow-sm" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
             {mode === "login" ? "Log in" : mode === "register" ? "Create Account" : "Reset Password"}

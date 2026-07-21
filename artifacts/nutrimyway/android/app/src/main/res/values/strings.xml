@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">NMW-Solo</string>
-    <string name="title_activity_main">NMW-Solo</string>
-    <string name="package_name">in.nutrimyway.solo</string>
-    <string name="custom_url_scheme">in.nutrimyway.solo</string>
+    <string name="app_name">HealthLogix</string>
+    <string name="title_activity_main">HealthLogix</string>
+    <string name="package_name">in.healthlogix.app</string>
+    <string name="custom_url_scheme">in.healthlogix.app</string>
 </resources>

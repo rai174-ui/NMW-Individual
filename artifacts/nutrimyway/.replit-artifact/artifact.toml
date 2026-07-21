@@ -1,8 +1,8 @@
 kind = "web"
 previewPath = "/"
-title = "NutriMyWay"
+title = "HealthLogix"
 version = "1.0.0"
-id = "artifacts/nutrimyway"
+id = "artifacts/HealthLogix"
 router = "path"
 
 [[integratedSkills]]
@@ -15,11 +15,11 @@ paths = [ "/" ]
 localPort = 23159
 
 [services.development]
-run = "pnpm --filter @workspace/nutrimyway run dev"
+run = "pnpm --filter @workspace/HealthLogix run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/nutrimyway", "run", "build" ]
-publicDir = "artifacts/nutrimyway/dist/public"
+build = [ "pnpm", "--filter", "@workspace/HealthLogix", "run", "build" ]
+publicDir = "artifacts/HealthLogix/dist/public"
 serve = "static"
 
 [[services.production.rewrites]]

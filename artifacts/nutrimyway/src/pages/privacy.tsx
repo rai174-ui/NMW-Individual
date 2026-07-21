@@ -13,7 +13,7 @@ export function Privacy() {
         <div className="space-y-6 text-sm text-muted-foreground leading-relaxed">
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">1. Introduction</h2>
-            <p>Welcome to NutriMyWay. Your privacy is important to us. This policy explains how we collect, use, and protect your information.</p>
+            <p>Welcome to HealthLogix. Your privacy is important to us. This policy explains how we collect, use, and protect your information.</p>
           </section>
 
           <section>
@@ -33,7 +33,7 @@ export function Privacy() {
 
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">5. How We Use Information</h2>
-            <p>We use the data to provide and improve the NutriMyWay experience, personalizing your wellness journey and facilitating communication with your wellness center.</p>
+            <p>We use the data to provide and improve the HealthLogix experience, personalizing your wellness journey and facilitating communication with your wellness center.</p>
           </section>
 
           <section>

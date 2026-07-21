@@ -23,16 +23,6 @@ const features = [
     title: "Health Monitoring",
     desc: "Record weight, BMI, body fat and other metrics. Visualise trends with easy-to-read charts.",
   },
-  {
-    icon: ShieldCheck,
-    title: "Nutrition Plans",
-    desc: "Follow plans issued by your wellness centre — view progress, history and current plan details.",
-  },
-  {
-    icon: Zap,
-    title: "Centre Integration",
-    desc: "Stay connected with your wellness centre — view visit history, health records and centre news.",
-  },
 ];
 
 export function About() {
@@ -56,10 +46,10 @@ export function About() {
           className="relative z-10 flex flex-col items-center text-center gap-3"
         >
           <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-lg p-3">
-            <img src="/logo.jpg" alt="NutriMyWay" className="w-full h-full object-contain" />
+            <img src="/logo.jpg" alt="HealthLogix" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">NutriMyWay</h1>
+            <h1 className="text-2xl font-bold">HealthLogix</h1>
             <p className="text-white/70 text-sm mt-1">Your personal nutrition companion</p>
           </div>
         </motion.div>
@@ -73,8 +63,8 @@ export function About() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Our Mission</h2>
           </div>
           <p className="text-sm text-foreground leading-relaxed">
-            NutriMyWay empowers wellness centre members to take control of their health journey —
-            making nutrition tracking simple, personalised, and connected to the care team that supports them.
+            HealthLogix empowers you to take control of your health journey —
+            making nutrition tracking simple and personalised.
           </p>
         </motion.section>
 
@@ -105,7 +95,7 @@ export function About() {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Developed by</p>
             <p className="text-lg font-bold text-foreground">NutriMyWay</p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Personalized Nutrition Tracking & AI Wellness Guidance
+              This application is build and managed by NutriMyWay
             </p>
             <div className="border-t border-border pt-3 space-y-2">
               <a

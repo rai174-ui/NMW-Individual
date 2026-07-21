@@ -26,9 +26,28 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:126171020028:android:3cb86214c10de997283579",
+        "android_client_info": {
+          "package_name": "in.healthlogix.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsUKKWZTPc0TBMl-CRUI4mnZCWZva1njE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:126171020028:android:f9a26da27fb8f832283579",
         "android_client_info": {
-          "package_name": "in.nutrimyway.solo"
+          "package_name": "in.nutrimyway.app"
         }
       },
       "oauth_client": [],

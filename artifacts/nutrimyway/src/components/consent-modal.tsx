@@ -39,12 +39,12 @@ export function ConsentModal({ onAccepted, endpoint }: { onAccepted: () => void;
           </div>
           <h1 className="text-lg font-bold text-foreground">Before you continue</h1>
           <p className="text-sm text-muted-foreground">
-            Please review and accept our Terms of Service and Privacy Policy to continue using NutriMyWay.
+            Please review and accept our Terms of Service and Privacy Policy to continue using HealthLogix.
           </p>
         </div>
 
         <div className="max-h-40 overflow-y-auto text-xs text-muted-foreground bg-muted/40 rounded-lg p-3 leading-relaxed">
-          By using NutriMyWay, you agree to let your wellness center record your check-ins, meal logs, and
+          By using HealthLogix, you agree to let your wellness center record your check-ins, meal logs, and
           health metrics for the purpose of tracking your nutrition plan. Your data is shared only with your
           wellness center and is not sold to third parties. You may request deletion of your data at any time
           by contacting your center.

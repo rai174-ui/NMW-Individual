@@ -50,7 +50,7 @@ packages = ["run"]
 SMTP_HOST = "smtp.gmail.com"
 SMTP_USER = "satish.rai.automation@gmail.com"
 SMTP_PORT = "587"
-SMTP_FROM_NAME = "NutriMyWay"
+SMTP_FROM_NAME = "HealthLogix"
 
 [[ports]]
 localPort = 3000

@@ -22,7 +22,7 @@ export function SyncGuide() {
           Missing Activity Data?
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          NutriMyWay relies on your device's native health system (Google Health Connect on Android or Apple Health on iOS). 
+          HealthLogix relies on your device's native health system (Google Health Connect on Android or Apple Health on iOS). 
           If your smartwatch data isn't showing up, it's likely because your wearable's app isn't permitted to share data with the native system.
         </p>
       </section>

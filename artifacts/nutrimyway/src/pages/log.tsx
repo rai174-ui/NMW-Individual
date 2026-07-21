@@ -59,6 +59,7 @@ export function Log() {
 
   const [aiLoading, setAiLoading] = useState(false);
   const [aiEstimated, setAiEstimated] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export function Log() {
   const { data: member } = useGetMember(MEMBER_ID!, {
     query: { enabled: !!MEMBER_ID, queryKey: getGetMemberQueryKey(MEMBER_ID!) }
   });
-  const isPremium = member?.valid_until && new Date(member.valid_until) >= new Date(new Date().toISOString().split('T')[0]);
+  const isPremium = true;
 
   const { data: logs, refetch: refetchLogs } = useGetConsumptionLogs(
     MEMBER_ID!, 
@@ -95,25 +96,6 @@ export function Log() {
     const protein = customProtein !== "" ? Number(customProtein) : null;
     const fiber = customFiber !== "" ? Number(customFiber) : null;
     let photoUrl: string | null = null;
-
-    if (pendingPhoto) {
-      try {
-        const urlRes = await apiFetch(`/storage/uploads/request-url`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: pendingPhoto.name, size: pendingPhoto.size, contentType: pendingPhoto.type }),
-        });
-        if (urlRes.ok) {
-          const { uploadURL, objectPath } = await urlRes.json() as { uploadURL: string; objectPath: string };
-          const putRes = await fetch(uploadURL, { method: "PUT", body: pendingPhoto, headers: { "Content-Type": pendingPhoto.type } });
-          if (putRes.ok) {
-            photoUrl = objectPath;
-          }
-        }
-      } catch {
-        // non-blocking
-      }
-    }
 
     createLog.mutate(
       {
@@ -233,24 +215,27 @@ export function Log() {
       reader.readAsDataURL(file);
     });
 
-    const res = await apiFetch(`/members/${MEMBER_ID}/vision`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: base64, mimeType: file.type }),
-    });
-    
-    if (!res.ok) {
-      const { error } = await res.json();
-      throw new Error(error || "Failed to analyze image");
-    }
+    try {
+      const res = await apiFetch(`/members/${MEMBER_ID}/vision`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64, mimeType: file.type }),
+      });
+      
+      if (!res.ok) {
+        throw new Error("AI unable to process try later or type manually");
+      }
 
-    const aiData = await res.json();
-    setFoodItem(aiData.food_item || "");
-    setCustomKcal(aiData.calories_kcal ? String(aiData.calories_kcal) : "");
-    setCustomProtein(aiData.protein_g ? String(aiData.protein_g) : "");
-    setCustomFiber(aiData.fiber_g ? String(aiData.fiber_g) : "");
-    setAiEstimated(true);
-    toast({ title: "Analyzed by AI ?", description: "Values estimated from photo. Please review." });
+      const aiData = await res.json();
+      setFoodItem(aiData.food_item || "");
+      setCustomKcal(aiData.calories_kcal ? String(aiData.calories_kcal) : "");
+      setCustomProtein(aiData.protein_g ? String(aiData.protein_g) : "");
+      setCustomFiber(aiData.fiber_g ? String(aiData.fiber_g) : "");
+      setAiEstimated(true);
+      toast({ title: "Analyzed by AI ?", description: "Values estimated from photo. Please review." });
+    } catch (e) {
+      throw new Error("AI unable to process try later or type manually");
+    }
   }
 
   return (
@@ -311,15 +296,17 @@ export function Log() {
             </button>
           </div>
           
-          <div className="bg-card rounded-xl border p-3 shadow-sm space-y-3">
+          <div className="bg-card rounded-xl border p-3 shadow-sm space-y-3 relative">
             <input
               type="text"
-              list="historic-meals"
               placeholder="e.g. Grilled Chicken Salad"
               value={foodItem}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               onChange={(e) => {
                 const val = e.target.value;
                 setFoodItem(val);
+                setShowDropdown(true);
                 // Autocomplete if it exactly matches a historic meal
                 const match = historicMeals?.find(m => m.food_item === val);
                 if (match) {
@@ -330,11 +317,29 @@ export function Log() {
               }}
               className="w-full px-3 py-2 bg-transparent text-sm font-medium border rounded-lg focus:border-primary outline-none transition-colors"
             />
-            <datalist id="historic-meals">
-              {foodItem.length >= 2 && historicMeals?.map((meal, idx) => (
-                <option key={idx} value={meal.food_item} />
-              ))}
-            </datalist>
+            
+            {showDropdown && foodItem.length >= 2 && historicMeals && historicMeals.filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase()).length > 0 && (
+              <div className="absolute z-50 left-3 right-3 top-[56px] max-h-40 overflow-y-auto bg-card text-foreground rounded-lg border shadow-lg overflow-hidden">
+                {historicMeals
+                  .filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase())
+                  .slice(0, 6)
+                  .map((meal, idx) => (
+                    <button
+                      key={idx}
+                      className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted focus:bg-muted border-b last:border-0"
+                      onClick={() => {
+                        setFoodItem(meal.food_item);
+                        setCustomKcal(meal.calories_kcal ? String(meal.calories_kcal) : "");
+                        setCustomProtein(meal.protein_g ? String(meal.protein_g) : "");
+                        setCustomFiber(meal.fiber_g ? String(meal.fiber_g) : "");
+                        setShowDropdown(false);
+                      }}
+                    >
+                      {meal.food_item}
+                    </button>
+                  ))}
+              </div>
+            )}
 
             <div className="flex gap-2">
               <div className="relative flex-1">

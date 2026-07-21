@@ -1,8 +1,8 @@
 import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "in.nutrimyway.solo",
-  appName: "NMW-Solo",
+  appId: "in.healthlogix.app",
+  appName: "HealthLogix",
   webDir: "dist/public",
   server: {
     // In production, the app loads from the bundled files.
