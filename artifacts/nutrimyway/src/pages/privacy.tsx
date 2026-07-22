@@ -46,7 +46,7 @@ export function Privacy() {
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">5. Data Retention and Deletion</h2>
             <p className="mb-2">We will only keep your personal information for as long as it is necessary for the purposes set out in this privacy policy, unless a longer retention period is required or permitted by law. You have the right to request the deletion of your personal data at any time.</p>
-            <p><strong>Account Deletion:</strong> You can delete your account and all associated health data by navigating to the Profile section within the App and selecting "Delete Account", or by contacting us directly at privacy@healthlogix.nutrimyway.in. Upon receiving a deletion request, we will permanently remove your personal and health data from our active databases within 30 days.</p>
+            <p><strong>Account Deletion:</strong> You can delete your account and all associated health data by navigating to the Profile section within the App and selecting "Delete Account", or by contacting us directly at support@nutrimyway.in. Upon receiving a deletion request, we will permanently remove your personal and health data from our active databases within 30 days.</p>
           </section>
 
           <section>
@@ -61,7 +61,7 @@ export function Privacy() {
 
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-2">8. Contact Us</h2>
-            <p>If you have questions or comments about this policy, you may email us at <strong>privacy@healthlogix.nutrimyway.in</strong>.</p>
+            <p>If you have questions or comments about this policy, you may email us at <strong>support@nutrimyway.in</strong>.</p>
           </section>
         </div>
       </div>
