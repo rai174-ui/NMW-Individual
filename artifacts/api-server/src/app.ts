@@ -39,14 +39,35 @@ const ALLOWED_ORIGINS = [
   "capacitor://localhost",
   "ionic://localhost",
   "https://nutrimyway.in",
+  "https://healthlogix.nutrimyway.in",
   "https://nutrimyway-production.up.railway.app",
 ];
 
 app.use(
     cors({
       origin: function (origin, cb) {
-        // Temporarily allow all origins to debug AAB issue
-        return cb(null, true);
+        // No origin = same-origin or server-to-server — allow
+        if (!origin) return cb(null, true);
+
+        // Allow exact matches from our list
+        if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+
+        // Allow any railway subdomain
+        if (origin.endsWith(".up.railway.app")) return cb(null, true);
+
+        // Allow local development ports (e.g., localhost:5173)
+        if (
+          origin.startsWith("http://localhost:") ||
+          origin.startsWith("https://localhost:") ||
+          // Some Play Store builds change the origin to something like http://in.healthlogix.app
+          // We don't want to wildcard allow everything, but since we are locking down by App ID
+          origin.startsWith("http://in.healthlogix.app") ||
+          origin.startsWith("https://in.healthlogix.app")
+        ) {
+          return cb(null, true);
+        }
+
+        cb(new Error(`CORS: origin not allowed — ${origin}`));
       },
       credentials: true,
       methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
