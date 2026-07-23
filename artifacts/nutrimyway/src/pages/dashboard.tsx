@@ -30,17 +30,17 @@ function ProgressRing({
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - pct * circumference;
 
-  let stop1 = "#d8b4fe"; // purple-300
-  let stop2 = "#a855f7"; // purple-500
+  let stop1 = "#8ce4f5"; // cyan-light
+  let stop2 = "#27c5e9"; // cyan-base
   if (pct >= 1.0) {
     stop1 = "#ea580c"; // orange-600
     stop2 = "#991b1b"; // red-800
   } else if (pct >= 0.85) {
-    stop1 = "#a855f7"; // purple-500
+    stop1 = "#27c5e9"; // cyan-base
     stop2 = "#ea580c"; // orange-600
   } else if (pct >= 0.5) {
-    stop1 = "#c084fc"; // purple-400
-    stop2 = "#7e22ce"; // purple-700
+    stop1 = "#cbf6e3"; // mint-light
+    stop2 = "#9ef0c8"; // mint-base
   }
 
   const basePct = (baseMax && max > 0) ? baseMax / max : 1;
@@ -61,7 +61,7 @@ function ProgressRing({
         {baseMax !== undefined && secondaryMax !== undefined ? (
           <>
             <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
-                    className="stroke-purple-100 dark:stroke-purple-900/40 fill-none" 
+                    className="stroke-cyan-pale dark:stroke-cyan-dark/40 fill-none" 
                     strokeDasharray={circumference} strokeDashoffset={baseOffset} />
             <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
                     className="stroke-orange-100 dark:stroke-orange-900/40 fill-none" 
@@ -290,15 +290,15 @@ export function Dashboard() {
               {Math.round(macros.total_protein_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_protein_g || 100}g</span>
             </span>
           </div>
-          <div className="flex-1 bg-indigo-500/10 rounded-xl p-2 flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-indigo-600 tracking-wider">FIBER</span>
-            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-indigo-600"))}>
+          <div className="flex-1 bg-mint-base/20 rounded-xl p-2 flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-mint-dark tracking-wider">FIBER</span>
+            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-mint-dark"))}>
               {Math.round(macros.total_fiber_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_fiber_g || 30}g</span>
             </span>
           </div>
-          <div className="flex-1 bg-indigo-500/10 rounded-xl p-2 flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-indigo-600 tracking-wider">WATER</span>
-            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-indigo-600"))}>
+          <div className="flex-1 bg-cyan-base/10 rounded-xl p-2 flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-cyan-dark tracking-wider">WATER</span>
+            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-cyan-dark"))}>
               {totalWater}<span className="text-[10px] opacity-70">/{member?.target_water_ml || 2000}ml</span>
             </span>
           </div>
@@ -307,8 +307,8 @@ export function Dashboard() {
         {/* Log Water */}
         <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-              <Droplet className="w-4 h-4 text-indigo-500 fill-indigo-500/50" />
+            <div className="w-8 h-8 rounded-full bg-cyan-pale flex items-center justify-center">
+              <Droplet className="w-4 h-4 text-cyan-dark fill-cyan-base/50" />
             </div>
             <div>
               <h3 className="font-bold text-foreground text-xs">Log Water</h3>
@@ -319,14 +319,14 @@ export function Dashboard() {
             <button 
               onClick={handleSubtractWater} 
               disabled={addingWater || totalWater === 0}
-              className="w-8 h-8 rounded-full border border-indigo-200 text-indigo-500 flex items-center justify-center active:scale-95 disabled:opacity-50 bg-indigo-50/50 hover:bg-indigo-50"
+              className="w-8 h-8 rounded-full border border-cyan-light text-cyan-dark flex items-center justify-center active:scale-95 disabled:opacity-50 bg-cyan-pale/50 hover:bg-cyan-pale"
             >
               <Minus className="w-3 h-3" />
             </button>
             <button
               onClick={() => handleAddWater(250)}
               disabled={addingWater}
-              className="px-3 py-1.5 bg-indigo-500 text-white rounded-full text-[10px] uppercase tracking-wider font-bold flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-50 min-w-[70px] justify-center"
+              className="px-3 py-1.5 bg-cyan-base text-white rounded-full text-[10px] uppercase tracking-wider font-bold flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-50 min-w-[70px] justify-center"
             >
               {addingWater ? (
                 <Loader2 className="w-3 h-3 animate-spin" />

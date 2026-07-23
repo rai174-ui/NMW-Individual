@@ -102,7 +102,7 @@ export function Profile() {
             </button>
             {member?.is_admin && (
               <Link href="/admin">
-                <button className="text-xs font-medium px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg active:scale-95 transition-transform">
+                <button className="text-xs font-medium px-3 py-1.5 bg-cyan-pale text-cyan-dark rounded-lg active:scale-95 transition-transform">
                   Admin Panel
                 </button>
               </Link>
