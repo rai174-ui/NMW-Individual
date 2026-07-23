@@ -11,6 +11,18 @@ import { apiFetch } from "@/lib/api-base";
 import { TargetsDrawer } from "@/components/targets-drawer";
 import { ProfileDrawer } from "@/components/profile-drawer";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 export function Profile() {
   const { memberId: MEMBER_ID, logout } = useAuth();
@@ -29,6 +41,8 @@ export function Profile() {
 
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [isRenewing, setIsRenewing] = useState(false);
 
   const handleRenew = async () => {
@@ -36,8 +50,6 @@ export function Profile() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("WARNING: Are you sure you want to permanently delete your account? This action cannot be undone and all your logs will be wiped!")) return;
-    
     setIsDeleting(true);
     try {
       const res = await apiFetch(`/members/${MEMBER_ID}`, { method: "DELETE" });
@@ -93,13 +105,6 @@ export function Profile() {
             >
               Edit Profile
             </button>
-            <button 
-              onClick={() => logout()}
-              className="text-xs font-medium px-3 py-1.5 bg-destructive/10 text-destructive rounded-lg active:scale-95 transition-transform flex items-center gap-1.5"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Logout
-            </button>
             {member?.is_admin && (
               <Link href="/admin">
                 <button className="text-xs font-medium px-3 py-1.5 bg-cyan-pale text-cyan-dark rounded-lg active:scale-95 transition-transform">
@@ -154,21 +159,66 @@ export function Profile() {
 
 
 
-      {/* Danger Zone */}
-      <section className="bg-destructive/5 border border-destructive/20 rounded-2xl p-5 shadow-sm mb-6">
-        <h2 className="text-sm font-semibold text-destructive flex items-center gap-2 mb-2">
-          <AlertTriangle className="w-4 h-4" />
-          Danger Zone
-        </h2>
-        <p className="text-xs text-muted-foreground mb-4">Permanently delete your account and all associated health and food logs. This cannot be undone.</p>
+      {/* Bottom Actions */}
+      <div className="flex flex-col gap-4 mb-6">
         <button 
-          onClick={handleDeleteAccount}
-          disabled={isDeleting}
-          className="w-full text-sm font-bold bg-destructive text-destructive-foreground py-2.5 rounded-xl active:scale-[0.98] transition-transform"
+          onClick={() => logout()}
+          className="w-full text-sm font-bold bg-card border border-border text-foreground py-3 rounded-xl shadow-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
         >
-          {isDeleting ? "Deleting..." : "Delete Account"}
+          <LogOut className="w-4 h-4" />
+          Log out
         </button>
-      </section>
+
+        <div className="text-center">
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <button className="text-xs font-medium text-muted-foreground hover:text-destructive underline decoration-muted-foreground/30 underline-offset-4 active:scale-95 transition-all">
+                Delete Account
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="w-[90vw] max-w-md rounded-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-destructive flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Delete Account
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your
+                  account and wipe all associated health and food logs from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="my-4">
+                <label className="text-sm font-medium mb-2 block">
+                  Please type <span className="font-bold">{member?.email}</span> to confirm.
+                </label>
+                <Input 
+                  value={deleteConfirmEmail}
+                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                  placeholder="Enter email to confirm"
+                  className="w-full"
+                />
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteConfirmEmail("")} className="rounded-xl">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent default close if not matched
+                    if (deleteConfirmEmail === member?.email) {
+                      handleDeleteAccount();
+                      setDeleteDialogOpen(false);
+                      setDeleteConfirmEmail("");
+                    }
+                  }}
+                  disabled={deleteConfirmEmail !== member?.email || isDeleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                >
+                  {isDeleting ? "Deleting..." : "Permanently Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
 
       <TargetsDrawer
         open={targetsDrawerOpen}
