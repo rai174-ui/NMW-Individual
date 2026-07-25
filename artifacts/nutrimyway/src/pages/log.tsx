@@ -60,6 +60,10 @@ export function Log() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiEstimated, setAiEstimated] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  
+  const [aiFoodResults, setAiFoodResults] = useState<{food_item: string; calories_kcal: number; protein_g: number; fiber_g: number}[]>([]);
+  const [isSearchingFood, setIsSearchingFood] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
@@ -125,6 +129,20 @@ export function Log() {
           setAiEstimated(false);
           setPendingPhoto(null);
           if (photoPreviewUrl) { URL.revokeObjectURL(photoPreviewUrl); setPhotoPreviewUrl(null); }
+          
+          // Trigger AI Coach message
+          apiFetch(`/members/${MEMBER_ID}/ai-coach`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ recentAction: `Logged a meal: ${foodItem} with ${kcal || 0} kcal and ${protein || 0}g protein.` })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.message) {
+              toast({ title: "✨ Coach says:", description: data.message });
+            }
+          })
+          .catch(err => console.error("AI Coach fetch failed", err));
         },
         onError: () => {
           setPendingPhoto(null);
@@ -307,6 +325,7 @@ export function Log() {
                 const val = e.target.value;
                 setFoodItem(val);
                 setShowDropdown(true);
+                setAiFoodResults([]); // clear search results when typing new thing
                 // Autocomplete if it exactly matches a historic meal
                 const match = historicMeals?.find(m => m.food_item === val);
                 if (match) {
@@ -318,26 +337,76 @@ export function Log() {
               className="w-full px-3 py-2 bg-transparent text-sm font-medium border rounded-lg focus:border-primary outline-none transition-colors"
             />
             
-            {showDropdown && foodItem.length >= 2 && historicMeals && historicMeals.filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase()).length > 0 && (
-              <div className="absolute z-50 left-3 right-3 top-[56px] max-h-40 overflow-y-auto bg-card text-foreground rounded-lg border shadow-lg overflow-hidden">
-                {historicMeals
-                  .filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase())
-                  .slice(0, 6)
-                  .map((meal, idx) => (
+            {showDropdown && foodItem.length >= 2 && (
+              <div className="absolute z-50 left-3 right-3 top-[56px] max-h-52 overflow-y-auto bg-card text-foreground rounded-lg border shadow-lg overflow-hidden flex flex-col">
+                {isSearchingFood ? (
+                  <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Searching...
+                  </div>
+                ) : aiFoodResults.length > 0 ? (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-semibold bg-muted/50 text-muted-foreground uppercase tracking-wider">AI Suggestions</div>
+                    {aiFoodResults.map((meal, idx) => (
+                      <button
+                        key={`ai-${idx}`}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted focus:bg-muted border-b last:border-0"
+                        onClick={() => {
+                          setFoodItem(meal.food_item);
+                          setCustomKcal(meal.calories_kcal ? String(meal.calories_kcal) : "");
+                          setCustomProtein(meal.protein_g ? String(meal.protein_g) : "");
+                          setCustomFiber(meal.fiber_g ? String(meal.fiber_g) : "");
+                          setShowDropdown(false);
+                        }}
+                      >
+                        <div className="font-medium">{meal.food_item}</div>
+                        <div className="text-[10px] text-muted-foreground">{meal.calories_kcal} kcal • {meal.protein_g}g protein</div>
+                      </button>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {historicMeals && historicMeals.filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase()).length > 0 && (
+                      <>
+                        <div className="px-3 py-1.5 text-xs font-semibold bg-muted/50 text-muted-foreground uppercase tracking-wider">Recent Meals</div>
+                        {historicMeals
+                          .filter(m => m.food_item.toLowerCase().includes(foodItem.toLowerCase()) && m.food_item.toLowerCase() !== foodItem.toLowerCase())
+                          .slice(0, 5)
+                          .map((meal, idx) => (
+                            <button
+                              key={`hist-${idx}`}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-muted focus:bg-muted border-b"
+                              onClick={() => {
+                                setFoodItem(meal.food_item);
+                                setCustomKcal(meal.calories_kcal ? String(meal.calories_kcal) : "");
+                                setCustomProtein(meal.protein_g ? String(meal.protein_g) : "");
+                                setCustomFiber(meal.fiber_g ? String(meal.fiber_g) : "");
+                                setShowDropdown(false);
+                              }}
+                            >
+                              {meal.food_item}
+                            </button>
+                          ))}
+                      </>
+                    )}
                     <button
-                      key={idx}
-                      className="w-full text-left px-3 py-2.5 text-sm hover:bg-muted focus:bg-muted border-b last:border-0"
-                      onClick={() => {
-                        setFoodItem(meal.food_item);
-                        setCustomKcal(meal.calories_kcal ? String(meal.calories_kcal) : "");
-                        setCustomProtein(meal.protein_g ? String(meal.protein_g) : "");
-                        setCustomFiber(meal.fiber_g ? String(meal.fiber_g) : "");
-                        setShowDropdown(false);
+                      className="w-full text-left px-3 py-3 text-sm font-medium text-primary hover:bg-muted focus:bg-muted flex items-center gap-2"
+                      onClick={async () => {
+                        setIsSearchingFood(true);
+                        try {
+                          const res = await apiFetch(`/food-search?q=${encodeURIComponent(foodItem)}`);
+                          const data = await res.json();
+                          setAiFoodResults(data);
+                        } catch (err) {
+                          toast({ title: "Search failed", variant: "destructive" });
+                        } finally {
+                          setIsSearchingFood(false);
+                        }
                       }}
                     >
-                      {meal.food_item}
+                      <Sparkles className="w-4 h-4" /> Search Internet for "{foodItem}"
                     </button>
-                  ))}
+                  </>
+                )}
               </div>
             )}
 

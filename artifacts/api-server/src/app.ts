@@ -9,6 +9,7 @@ import { pool } from "./lib/sqlite";
 import { ObjectStorageService } from "./lib/objectStorage";
 import { ObjectNotFoundError } from "./lib/objectStorage";
 import { sendPushNotification } from "./lib/push";
+import { initAiTipsJob } from "./jobs/ai-tips";
 
 const app: Express = express();
 
@@ -281,5 +282,8 @@ export function startPhotoCleanupScheduler(): void {
   setInterval(tick, 60 * 60_000);
   logger.info("Photo cleanup scheduler started (checking every hour)");
 }
+
+// Start AI Tips cron job
+initAiTipsJob();
 
 export default app;

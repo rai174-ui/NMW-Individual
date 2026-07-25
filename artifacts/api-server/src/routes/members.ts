@@ -531,7 +531,114 @@ router.delete("/members/:id", async (req, res) => {
   
   res.json({ message: "Account successfully deleted" });
 });
+// POST /api/members/:id/ai-coach
+router.post("/members/:id/ai-coach", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { recentAction } = req.body;
+  
+  if (!recentAction) {
+    res.status(400).json({ error: "recentAction is required" });
+    return;
+  }
+  
+  if (!process.env.GEMINI_API_KEY) {
+    res.status(500).json({ error: "AI is not configured on the server." });
+    return;
+  }
 
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+
+    const prompt = `You are the engaging and supportive in-app AI Health Coach for the app "HealthLogix". Your goal is to keep users motivated and informed as they log meals and physical activities, without being intrusive or annoying.
+Based on the user's recent action, generate a short, highly contextual message. To prevent the user from feeling bombarded, rotate your responses among the following three categories so the content always feels fresh:
+1. Kudos & Motivation: Celebrate their consistency, a logging streak, or a specific healthy choice they just made.
+2. Actionable Health Tips: Provide a quick, practical tip related to weight loss, nutrition, hydration, or recovery.
+3. "Did You Know?" Facts: Share a brief, interesting health or fitness fact sourced from reliable internet wellness knowledge.
+
+Strict Constraints:
+- Length: Keep it extremely brief—maximum 1 to 2 short sentences.
+- Tone: Encouraging, knowledgeable, subtle, and friendly. 
+- Formatting: Use conversational language and limit yourself to one relevant emoji.
+- Vibe: The message should feel like a gentle high-five or a passing piece of wisdom, not an urgent alert.
+
+User's Recent Action: ${recentAction}
+
+Generate the message (just the text, no quotes or markdown):`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    
+    res.json({ message: text });
+  } catch (err: any) {
+    console.error("AI Coach Error:", err);
+    res.status(500).json({ error: "Failed to generate coach message" });
+  }
+});
+
+// GET /api/members/:id/meal-history
+router.get("/members/:id/meal-history", async (req, res) => {
+  const memberId = Number(req.params.id);
+  
+  try {
+    const { rows } = await pool.query(
+      `SELECT DISTINCT ON (LOWER(food_item)) 
+         food_item, calories_kcal, protein_g, fiber_g 
+       FROM consumption_logs 
+       WHERE member_id = $1 AND food_item IS NOT NULL AND food_item != ''
+       ORDER BY LOWER(food_item), logged_at DESC 
+       LIMIT 50`,
+      [memberId]
+    );
+    res.json(rows);
+  } catch (err: any) {
+    console.error("Meal history error:", err);
+    res.status(500).json({ error: "Failed to fetch meal history" });
+  }
+});
+
+// GET /api/food-search
+router.get("/food-search", async (req, res) => {
+  const query = req.query.q as string;
+  
+  if (!query || query.length < 2) {
+    res.json([]);
+    return;
+  }
+  
+  if (!process.env.GEMINI_API_KEY) {
+    res.status(500).json({ error: "AI is not configured on the server." });
+    return;
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-3.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
+
+    const prompt = `Search for common foods matching "${query}". Return a JSON array of up to 5 generic food items with their estimated macros for a standard serving size.
+Return ONLY a JSON array with this exact structure:
+[
+  {
+    "food_item": "Name of food (Serving size)",
+    "calories_kcal": 0,
+    "protein_g": 0,
+    "fiber_g": 0
+  }
+]`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const json = JSON.parse(text);
+    
+    res.json(json);
+  } catch (err: any) {
+    console.error("Food search error:", err);
+    res.status(500).json({ error: "Failed to search food" });
+  }
+});
 
 export default router;
 
