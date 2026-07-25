@@ -18,11 +18,24 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges, push_token FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
   res.json(rows[0]);
+});
+
+// POST /api/members/:id/push-token
+router.post("/members/:id/push-token", async (req, res) => {
+  const memberId = Number(req.params.id);
+  const { token } = req.body;
+  if (!token) { res.status(400).json({ error: "Token required" }); return; }
+  
+  await pool.query(
+    `UPDATE members SET push_token = $1 WHERE id = $2`,
+    [token, memberId]
+  );
+  res.json({ success: true });
 });
 
 // PUT /api/members/:id/targets
