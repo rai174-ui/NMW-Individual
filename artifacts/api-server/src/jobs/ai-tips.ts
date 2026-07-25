@@ -12,7 +12,7 @@ export function initAiTipsJob() {
     return;
   }
 
-  // Schedule to run at 9 AM, 1 PM, 5 PM, and 8 PM every day
+  // Schedule to run at 9 AM, 1 PM, 5 PM, and 8 PM every day (IST)
   // "0 9,13,17,20 * * *"
   tipCronJob = cron.schedule("0 9,13,17,20 * * *", async () => {
     logger.info("Running scheduled AI Health Tip job...");
@@ -54,6 +54,8 @@ Constraints:
     } catch (err: any) {
       logger.error({ err }, "Error running AI Health Tip job");
     }
+  }, {
+    timezone: "Asia/Kolkata"
   });
 
   tipCronJob.start();
