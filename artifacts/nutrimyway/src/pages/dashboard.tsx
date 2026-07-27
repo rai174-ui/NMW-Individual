@@ -20,82 +20,50 @@ function safeFormat(value: string | null | undefined, fmt: string, fallback = "-
 function todayLocal() { return new Date().toLocaleDateString("en-CA"); }
 const TODAY = todayLocal();
 
-// -- Progress Ring ----------------------------------------------------------
-function ProgressRing({ 
-  value, max, baseMax, secondaryMax, label, color, colorClass, 
-  size = 120, strokeWidth = 8, unit = "" 
+// -- Mini Progress Ring -----------------------------------------------------
+function MiniProgressRing({ 
+  value, max, label, colorStops, size = 70, strokeWidth = 6, showPercent = false, unit = ""
 }: any) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const pct = max > 0 ? Math.min(value / max, 1) : 0;
   const offset = circumference - pct * circumference;
-
-  let stop1 = "#8ce4f5"; // cyan-light
-  let stop2 = "#27c5e9"; // cyan-base
-  if (pct >= 1.0) {
-    stop1 = "#ea580c"; // orange-600
-    stop2 = "#991b1b"; // red-800
-  } else if (pct >= 0.85) {
-    stop1 = "#27c5e9"; // cyan-base
-    stop2 = "#ea580c"; // orange-600
-  } else if (pct >= 0.5) {
-    stop1 = "#cbf6e3"; // mint-light
-    stop2 = "#9ef0c8"; // mint-base
-  }
-
-  const basePct = (baseMax && max > 0) ? baseMax / max : 1;
-  const baseOffset = circumference - basePct * circumference;
   
-  const secPct = (secondaryMax && max > 0) ? secondaryMax / max : 0;
-  const secOffset = circumference - secPct * circumference;
+  const gradientId = `grad-${label.replace(/\s+/g, '')}`;
 
   return (
-    <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="rotate-[-90deg]">
-        <defs>
-          <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={stop1} />
-            <stop offset="100%" stopColor={stop2} />
-          </linearGradient>
-        </defs>
-        {baseMax !== undefined && secondaryMax !== undefined ? (
-          <>
-            <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
-                    className="stroke-cyan-pale dark:stroke-cyan-dark/40 fill-none" 
-                    strokeDasharray={circumference} strokeDashoffset={baseOffset} />
-            <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} 
-                    className="stroke-orange-100 dark:stroke-orange-900/40 fill-none" 
-                    strokeDasharray={circumference} strokeDashoffset={secOffset} 
-                    style={{ transformOrigin: 'center', transform: `rotate(${basePct * 360}deg)` }} />
-          </>
-        ) : (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="rotate-[-90deg]">
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={colorStops[0]} />
+              <stop offset="100%" stopColor={colorStops[1]} />
+            </linearGradient>
+          </defs>
           <circle cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} className="stroke-muted/40 fill-none" />
-        )}
-        
-        <motion.circle
-          cx={size / 2} cy={size / 2} r={radius}
-          strokeWidth={strokeWidth}
-          stroke="url(#progress-gradient)"
-          strokeLinecap="round"
-          className="fill-none drop-shadow-sm"
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          style={{ strokeDasharray: circumference }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-bold tracking-tight text-foreground">
-          {Math.round(value)}
-          {unit && <span className="text-[10px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
-        </span>
-        {label && <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground mt-0.5">{label}</span>}
-        {baseMax !== undefined && secondaryMax !== undefined && (
-          <span className="text-[9px] font-semibold text-muted-foreground mt-1 whitespace-nowrap">
-            Target: {baseMax} + {secondaryMax}
+          
+          <motion.circle
+            cx={size / 2} cy={size / 2} r={radius}
+            strokeWidth={strokeWidth}
+            stroke={`url(#${gradientId})`}
+            strokeLinecap="round"
+            className="fill-none drop-shadow-sm"
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            style={{ strokeDasharray: circumference }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-[13px] font-bold tracking-tight text-foreground">
+            {showPercent ? `${Math.round(pct * 100)}%` : Math.round(value)}
+            {!showPercent && unit && <span className="text-[9px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
           </span>
-        )}
+          <span className="text-[7px] text-muted-foreground">{showPercent ? "" : label.toLowerCase()}</span>
+        </div>
       </div>
+      <span className="text-[10px] font-semibold text-foreground tracking-wide">{label}</span>
     </div>
   );
 }
@@ -237,32 +205,48 @@ export function Dashboard() {
 
       <main className="px-4 pt-4 flex flex-col gap-3">
         
-        {/* Main Nutrition Card */}
-        <section className="bg-card border shadow-sm rounded-2xl p-3 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
+        {/* Calorie Intake 4-Ring Card */}
+        <section className="bg-card border shadow-sm rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-1.5 rounded-lg bg-mint-base/20">
+              <Utensils className="w-4 h-4 text-mint-dark" />
+            </div>
+            <h2 className="text-sm font-bold text-foreground">Calorie Intake</h2>
+          </div>
           
-          <div className="flex gap-4 items-center">
-            <div className="w-1/2 flex flex-col items-center justify-center">
-              <ProgressRing
-                value={macros.total_kcal}
-                max={adjustedTarget}
-                baseMax={baseTarget}
-                secondaryMax={burned}
-                label="KCAL"
-                size={110}
-                strokeWidth={8}
-              />
-            </div>
-            <div className="w-1/2 flex flex-col justify-center gap-2 pr-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-muted-foreground font-semibold tracking-wider text-[10px]">PROTEIN</span>
-                <span className="font-bold">{Math.round(macros.total_protein_g ?? 0)}g</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-muted-foreground font-semibold tracking-wider text-[10px]">FIBER</span>
-                <span className="font-bold">{Math.round(macros.total_fiber_g ?? 0)}g</span>
-              </div>
-            </div>
+          <div className="flex justify-between items-end pb-2">
+            <MiniProgressRing 
+              value={macros.total_kcal} 
+              max={adjustedTarget} 
+              label="Calories" 
+              colorStops={["#facc15", "#ea580c"]} // Yellow to Orange
+            />
+            <MiniProgressRing 
+              value={macros.total_protein_g ?? 0} 
+              max={member?.target_protein_g || 100} 
+              label="Protein" 
+              unit="g"
+              colorStops={["#4ade80", "#16a34a"]} // Light green to Dark green
+            />
+            <MiniProgressRing 
+              value={macros.total_fiber_g ?? 0} 
+              max={member?.target_fiber_g || 30} 
+              label="Fiber" 
+              showPercent={true}
+              colorStops={["#4ade80", "#16a34a"]} // Light green to Dark green
+            />
+            <MiniProgressRing 
+              value={totalWater} 
+              max={member?.target_water_ml || 2500} 
+              label="Water" 
+              showPercent={true}
+              colorStops={["#60a5fa", "#2563eb"]} // Light blue to blue
+            />
+          </div>
+          <div className="flex justify-center mt-2 gap-1">
+            <div className="w-3 h-1 rounded-full bg-primary"></div>
+            <div className="w-1 h-1 rounded-full bg-muted"></div>
+            <div className="w-1 h-1 rounded-full bg-muted"></div>
           </div>
         </section>
 
@@ -281,28 +265,6 @@ export function Dashboard() {
             <span className="text-lg font-black text-orange-500">{burned} <span className="text-[10px] font-bold opacity-80 uppercase">kcal</span></span>
           </div>
         </section>
-
-        {/* Target Pills */}
-        <div className="flex gap-2">
-          <div className="flex-1 bg-primary/10 rounded-xl p-2 flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-primary tracking-wider">PROTEIN</span>
-            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_protein_g ?? 0, member?.target_protein_g || 100, "text-primary"))}>
-              {Math.round(macros.total_protein_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_protein_g || 100}g</span>
-            </span>
-          </div>
-          <div className="flex-1 bg-mint-base/20 rounded-xl p-2 flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-mint-dark tracking-wider">FIBER</span>
-            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(macros.total_fiber_g ?? 0, member?.target_fiber_g || 30, "text-mint-dark"))}>
-              {Math.round(macros.total_fiber_g ?? 0)}<span className="text-[10px] opacity-70">/{member?.target_fiber_g || 30}g</span>
-            </span>
-          </div>
-          <div className="flex-1 bg-cyan-base/10 rounded-xl p-2 flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-cyan-dark tracking-wider">WATER</span>
-            <span className={cn("text-xs font-bold mt-0.5", getProgressColorClass(totalWater, member?.target_water_ml || 2000, "text-cyan-dark"))}>
-              {totalWater}<span className="text-[10px] opacity-70">/{member?.target_water_ml || 2000}ml</span>
-            </span>
-          </div>
-        </div>
 
         {/* Log Water */}
         <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between">

@@ -28,8 +28,6 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
   const [showAiForm, setShowAiForm] = useState(false);
 
   // AI Form state
-  const [gender, setGender] = useState(member?.gender || "male");
-  const [ethnicity, setEthnicity] = useState("Indian");
   const [activityLevel, setActivityLevel] = useState("moderate");
 
   const isPremium = true;
@@ -60,12 +58,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
     setAiLoading(true);
     try {
       const payload = {
-        gender,
-        ethnicity,
-        activityLevel,
-        weight: 70, // Needs weight from last record ideally, using 70 as fallback if no records
-        height: member.height_cm,
-        age: age || 30
+        activityLevel
       };
       
       const res = await apiFetch(`/members/${memberId}/generate-targets`, {
@@ -170,26 +163,6 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
                   </div>
                 ) : (
                   <div className="space-y-3 mb-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Gender</label>
-                        <select value={gender} onChange={e => setGender(e.target.value)} className="w-full px-3 py-2 bg-background border rounded-lg text-sm outline-none">
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Ethnicity</label>
-                        <select value={ethnicity} onChange={e => setEthnicity(e.target.value)} className="w-full px-3 py-2 bg-background border rounded-lg text-sm outline-none">
-                          <option value="Indian">Indian</option>
-                          <option value="Caucasian">Caucasian</option>
-                          <option value="Asian">Asian</option>
-                          <option value="African">African</option>
-                          <option value="Hispanic">Hispanic</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                    </div>
                     <div>
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Activity Level</label>
                       <select value={activityLevel} onChange={e => setActivityLevel(e.target.value)} className="w-full px-3 py-2 bg-background border rounded-lg text-sm outline-none">

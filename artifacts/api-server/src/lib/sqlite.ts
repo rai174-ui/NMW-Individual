@@ -129,7 +129,9 @@ async function createTables(): Promise<void> {
     `ALTER TABLE public.members ALTER COLUMN height_cm TYPE REAL USING height_cm::real;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;`,
     `UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`,
-    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS push_token TEXT;`
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS push_token TEXT;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS current_weight_kg REAL;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS ethnicity TEXT;`
   ];
 
   for (const query of migrations) {

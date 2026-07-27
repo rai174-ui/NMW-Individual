@@ -24,6 +24,8 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
   const [mobile, setMobile] = useState(member?.mobile || "");
   const [dob, setDob] = useState(member?.dob || "");
   const [gender, setGender] = useState(member?.gender || "");
+  const [weight, setWeight] = useState(member?.current_weight_kg?.toString() || "");
+  const [ethnicity, setEthnicity] = useState(member?.ethnicity || "");
 
   
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,8 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
       setMobile(member?.mobile || "");
       setDob(member?.dob || "");
       setGender(member?.gender || "");
+      setWeight(member?.current_weight_kg?.toString() || "");
+      setEthnicity(member?.ethnicity || "");
     }
 
   }, [open, member]);
@@ -81,6 +85,8 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
         mobile: mobile || null,
         dob: dob || null,
         gender: gender || null,
+        current_weight_kg: weight ? parseFloat(weight) : null,
+        ethnicity: ethnicity || null,
       };
 
 
@@ -158,8 +164,37 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Date of Birth</label>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Weight (kg)</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 70"
+                  value={weight}
+                  onChange={e => setWeight(e.target.value)}
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Ethnicity</label>
+                <select 
+                  value={ethnicity} 
+                  onChange={e => setEthnicity(e.target.value)} 
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-base"
+                >
+                  <option value="">Select</option>
+                  <option value="Indian">Indian</option>
+                  <option value="Caucasian">Caucasian</option>
+                  <option value="Asian">Asian</option>
+                  <option value="African">African</option>
+                  <option value="Hispanic">Hispanic</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Date of Birth</label>
                 <input
                   type="date"
                   value={dob}

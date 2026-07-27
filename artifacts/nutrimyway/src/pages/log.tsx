@@ -320,7 +320,6 @@ export function Log() {
               placeholder="e.g. Grilled Chicken Salad"
               value={foodItem}
               onFocus={() => setShowDropdown(true)}
-              onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               onChange={(e) => {
                 const val = e.target.value;
                 setFoodItem(val);
@@ -339,6 +338,15 @@ export function Log() {
             
             {showDropdown && foodItem.length >= 2 && (
               <div className="absolute z-50 left-3 right-3 top-[56px] max-h-52 overflow-y-auto bg-card text-foreground rounded-lg border shadow-lg overflow-hidden flex flex-col">
+                <div className="sticky top-0 bg-card border-b flex justify-between items-center px-3 py-2 z-10">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Results</span>
+                  <button 
+                    onClick={() => setShowDropdown(false)}
+                    className="text-[10px] bg-muted px-2 py-1 rounded hover:bg-muted/80 font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
                 {isSearchingFood ? (
                   <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" /> Searching...
@@ -411,37 +419,46 @@ export function Log() {
             )}
 
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={customKcal}
-                  onChange={(e) => setCustomKcal(e.target.value)}
-                  className="w-full pl-2 pr-8 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">kcal</span>
+              <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
+                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Calorie</span>
+                <div className="relative mt-auto">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={customKcal}
+                    onChange={(e) => setCustomKcal(e.target.value)}
+                    className="w-full bg-transparent outline-none font-medium text-sm text-right pr-5"
+                  />
+                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">kcal</span>
+                </div>
               </div>
               
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={customProtein}
-                  onChange={(e) => setCustomProtein(e.target.value)}
-                  className="w-full pl-2 pr-6 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">g</span>
+              <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
+                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Protein</span>
+                <div className="relative mt-auto">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={customProtein}
+                    onChange={(e) => setCustomProtein(e.target.value)}
+                    className="w-full bg-transparent outline-none font-medium text-sm text-right pr-3"
+                  />
+                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">g</span>
+                </div>
               </div>
 
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={customFiber}
-                  onChange={(e) => setCustomFiber(e.target.value)}
-                  className="w-full pl-2 pr-6 py-2 bg-transparent border rounded-lg focus:border-primary outline-none font-medium text-sm text-center"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">g</span>
+              <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
+                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Fiber</span>
+                <div className="relative mt-auto">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={customFiber}
+                    onChange={(e) => setCustomFiber(e.target.value)}
+                    className="w-full bg-transparent outline-none font-medium text-sm text-right pr-3"
+                  />
+                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">g</span>
+                </div>
               </div>
             </div>
 
@@ -473,9 +490,9 @@ export function Log() {
           </div>
 
           <button
-            disabled={createLog.isPending || isSaving || !foodItem.trim()}
-            onClick={handleSave}
-            className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 text-sm shadow-sm"
+            disabled={loading || !foodItem.trim() || !customKcal || Number(customKcal) <= 0}
+            onClick={handleLogMeal}
+            className="w-full h-12 rounded-full bg-[#82c2a9] text-white font-bold text-lg active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center shadow-md mb-8"
           >
             {createLog.isPending || isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Meal"}
             {isSaving && "Saving..."}

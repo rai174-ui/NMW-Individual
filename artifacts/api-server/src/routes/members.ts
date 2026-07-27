@@ -18,7 +18,7 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges, push_token FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges, push_token, current_weight_kg, ethnicity, gender FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
@@ -60,17 +60,19 @@ router.put("/members/:id/targets", async (req, res) => {
 // PUT /api/members/:id/profile
 router.put("/members/:id/profile", async (req, res) => {
   const memberId = Number(req.params.id);
-  const { name, height_cm, mobile, dob, gender } = req.body;
+  const { name, height_cm, mobile, dob, gender, current_weight_kg, ethnicity } = req.body;
   const { rows } = await pool.query(
     `UPDATE members 
-     SET name = COALESCE($1, name), height_cm = $2, mobile = $3, dob = $4, gender = $5 
-     WHERE id = $6 RETURNING id, name, height_cm, mobile, dob, gender`,
+     SET name = COALESCE($1, name), height_cm = $2, mobile = $3, dob = $4, gender = $5, current_weight_kg = $6, ethnicity = $7 
+     WHERE id = $8 RETURNING id, name, height_cm, mobile, dob, gender, current_weight_kg, ethnicity`,
     [
       name, 
       height_cm ?? null, 
       mobile ?? null, 
       dob ?? null, 
       gender ?? null,
+      current_weight_kg ?? null,
+      ethnicity ?? null,
       memberId
     ]
   );
@@ -452,13 +454,40 @@ router.delete("/members/:id/water/latest", async (req, res) => {
 router.post("/members/:id/generate-targets", async (req, res) => {
   const memberId = Number(req.params.id);
   
-  // Premium Check
-  // Premium Check Removed for unlimited validity
-  const { rows: memberRows } = await pool.query("SELECT valid_until FROM members WHERE id = $1", [memberId]);
+  const { rows: memberRows } = await pool.query(
+    "SELECT valid_until, gender, current_weight_kg, height_cm, age_at_joining, dob, ethnicity FROM members WHERE id = $1", 
+    [memberId]
+  );
   if (!memberRows[0]) { res.status(404).json({ error: "Member not found" }); return; }
 
+  const m = memberRows[0];
+
+  // Calculate age if missing
+  let age = m.age_at_joining;
+  if (!age && m.dob) {
+    const birthDate = new Date(m.dob);
+    const today = new Date();
+    age = today.getFullYear() - birthDate.getFullYear();
+    const mm = today.getMonth() - birthDate.getMonth();
+    if (mm < 0 || (mm === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+  }
+
+  // Get weight, fallback to latest health record if current_weight_kg is null
+  let weight = m.current_weight_kg;
+  if (!weight) {
+    const { rows: hrRows } = await pool.query(
+      "SELECT weight_kg FROM health_records WHERE member_id = $1 AND weight_kg IS NOT NULL ORDER BY recorded_at DESC LIMIT 1",
+      [memberId]
+    );
+    if (hrRows[0]) {
+      weight = hrRows[0].weight_kg;
+    }
+  }
+
   try {
-    const { gender, weight, height, age, ethnicity, activityLevel } = req.body;
+    const { activityLevel } = req.body;
     
     if (!process.env.GEMINI_API_KEY) {
       res.status(500).json({ error: "AI Vision is not configured on the server." });
@@ -473,11 +502,11 @@ router.post("/members/:id/generate-targets", async (req, res) => {
     });
 
     const prompt = `You are an expert nutritionist. Calculate daily macronutrient targets based on:
-    Gender: ${gender}
-    Weight: ${weight} kg
-    Height: ${height} cm
-    Age: ${age} years
-    Ethnicity: ${ethnicity}
+    Gender: ${m.gender || "male"}
+    Weight: ${weight || 70} kg
+    Height: ${m.height_cm || 170} cm
+    Age: ${age || 30} years
+    Ethnicity: ${m.ethnicity || "Indian"}
     Activity Level: ${activityLevel}
     
     Return ONLY a JSON object with this exact structure:
