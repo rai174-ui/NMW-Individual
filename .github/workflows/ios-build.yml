@@ -1,0 +1,73 @@
+name: iOS Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        working-directory: artifacts/nutrimyway
+        run: pnpm install
+
+      - name: Build Web App
+        working-directory: artifacts/nutrimyway
+        run: pnpm run build:mobile
+
+      - name: Sync Capacitor (iOS)
+        working-directory: artifacts/nutrimyway
+        run: npx cap sync ios
+
+      - name: Build Unsigned iOS Archive (Verification)
+        working-directory: artifacts/nutrimyway/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      # NOTE: The steps below are commented out until your Apple Developer Account is active.
+      # Once active, we will uncomment these to generate the final .ipa file for the App Store!
+      
+      # - name: Install Apple Certificate and Provisioning Profile
+      #   env:
+      #     BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+      #     P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+      #     BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+      #     KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      #   run: |
+      #     # Script to install certs goes here
+
+      # - name: Build Signed iOS App (.ipa)
+      #   working-directory: artifacts/nutrimyway/ios/App
+      #   run: |
+      #     # Script to build IPA goes here
+      
+      # - name: Upload IPA Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-release.ipa
+      #     path: artifacts/nutrimyway/ios/App/build/App.ipa
