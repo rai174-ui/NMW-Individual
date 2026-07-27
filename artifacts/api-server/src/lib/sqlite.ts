@@ -131,7 +131,8 @@ async function createTables(): Promise<void> {
     `UPDATE public.members SET is_admin = TRUE WHERE email = 'rai.174@gmail.com';`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS push_token TEXT;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS current_weight_kg REAL;`,
-    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS ethnicity TEXT;`
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS ethnicity TEXT;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fasting_hours REAL DEFAULT 16;`
   ];
 
   for (const query of migrations) {

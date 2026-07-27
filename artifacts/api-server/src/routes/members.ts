@@ -18,15 +18,15 @@ router.param("id", (req, res, next, id) => {
 // GET /api/members/:id
 router.get("/members/:id", async (req, res) => {
   const { rows } = await pool.query(
-    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, valid_until, is_admin, ai_charges, push_token, current_weight_kg, ethnicity, gender FROM members WHERE id = $1", 
+    "SELECT id, name, email, date_of_joining, height_cm, mobile, dob, age_at_joining, is_active, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, target_fasting_hours, valid_until, is_admin, ai_charges, push_token, current_weight_kg, ethnicity, gender FROM members WHERE id = $1", 
     [Number(req.params.id)]
   );
   if (!rows[0]) { res.status(404).json({ error: "Member not found" }); return; }
   res.json(rows[0]);
 });
 
-// POST /api/members/:id/push-token
-router.post("/members/:id/push-token", async (req, res) => {
+// PUT /api/members/:id/push-token
+router.put("/members/:id/push-token", async (req, res) => {
   const memberId = Number(req.params.id);
   const { token } = req.body;
   if (!token) { res.status(400).json({ error: "Token required" }); return; }
@@ -41,19 +41,25 @@ router.post("/members/:id/push-token", async (req, res) => {
 // PUT /api/members/:id/targets
 router.put("/members/:id/targets", async (req, res) => {
   const memberId = Number(req.params.id);
-  const { daily_kcal, target_protein_g, target_fiber_g, target_water_ml } = req.body;
+  const { daily_kcal, target_protein_g, target_fiber_g, target_water_ml, target_fasting_hours } = req.body;
+
   const { rows } = await pool.query(
     `UPDATE members 
-     SET daily_kcal = $1, target_protein_g = $2, target_fiber_g = $3, target_water_ml = $4 
-     WHERE id = $5 RETURNING id, daily_kcal, target_protein_g, target_fiber_g, target_water_ml`,
+     SET daily_kcal = $1, target_protein_g = $2, target_fiber_g = $3, target_water_ml = $4, target_fasting_hours = $5
+     WHERE id = $6 RETURNING id, daily_kcal, target_protein_g, target_fiber_g, target_water_ml, target_fasting_hours`,
     [
       daily_kcal ?? null, 
       target_protein_g ?? null, 
       target_fiber_g ?? null, 
       target_water_ml ?? null, 
+      target_fasting_hours ?? null,
       memberId
     ]
   );
+  if (!rows.length) {
+    res.status(404).json({ error: "Member not found" });
+    return;
+  }
   res.json(rows[0]);
 });
 
