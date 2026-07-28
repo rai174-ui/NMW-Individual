@@ -86,14 +86,14 @@ jobs:
       - name: Build and Archive iOS App (.xcarchive)
         working-directory: artifacts/nutrimyway/ios/App
         run: |
+          # Inject real TEAM_ID into project file
+          sed -i '' "s/REPLACEME_TEAM_ID/${{ secrets.TEAM_ID }}/g" App.xcodeproj/project.pbxproj
+          
           xcodebuild -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -archivePath $RUNNER_TEMP/App.xcarchive \
             -sdk iphoneos \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            DEVELOPMENT_TEAM="${{ secrets.TEAM_ID }}" \
             clean archive
 
       - name: Export IPA
