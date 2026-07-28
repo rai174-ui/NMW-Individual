@@ -22,6 +22,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
   const [protein, setProtein] = useState(member?.target_protein_g?.toString() || "");
   const [fiber, setFiber] = useState(member?.target_fiber_g?.toString() || "");
   const [water, setWater] = useState(member?.target_water_ml?.toString() || "");
+  const [fasting, setFasting] = useState(member?.target_fasting_hours?.toString() || "16");
   
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -94,6 +95,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
       setProtein(member?.target_protein_g?.toString() || "");
       setFiber(member?.target_fiber_g?.toString() || "");
       setWater(member?.target_water_ml?.toString() || "");
+      setFasting(member?.target_fasting_hours?.toString() || "16");
     }
   }, [open, member]);
 
@@ -105,6 +107,7 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
         target_protein_g: protein ? Number(protein) : null,
         target_fiber_g: fiber ? Number(fiber) : null,
         target_water_ml: water ? Number(water) : null,
+        target_fasting_hours: fasting ? Number(fasting) : null,
       };
 
       const res = await apiFetch(`/members/${memberId}/targets`, {
@@ -223,16 +226,29 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Water (ml)</label>
-              <input
-                type="number"
-                step="any"
-                placeholder="e.g. 3000"
-                value={water}
-                onChange={e => setWater(e.target.value)}
-                className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Water (ml)</label>
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="e.g. 3000"
+                  value={water}
+                  onChange={e => setWater(e.target.value)}
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Fasting Goal (h)</label>
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="e.g. 16"
+                  value={fasting}
+                  onChange={e => setFasting(e.target.value)}
+                  className="w-full px-4 py-3 bg-muted/40 border rounded-xl focus:border-primary outline-none font-medium text-lg"
+                />
+              </div>
             </div>
           </div>
 

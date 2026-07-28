@@ -490,8 +490,8 @@ export function Log() {
           </div>
 
           <button
-            disabled={loading || !foodItem.trim() || !customKcal || Number(customKcal) <= 0}
-            onClick={handleLogMeal}
+            disabled={createLog.isPending || isSaving || !foodItem.trim() || !customKcal || Number(customKcal) <= 0}
+            onClick={handleSave}
             className="w-full h-12 rounded-full bg-[#82c2a9] text-white font-bold text-lg active:scale-95 transition-transform disabled:opacity-50 flex items-center justify-center shadow-md mb-8"
           >
             {createLog.isPending || isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Meal"}

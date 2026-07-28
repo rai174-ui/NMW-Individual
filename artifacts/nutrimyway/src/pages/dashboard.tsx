@@ -4,7 +4,8 @@ import { Link } from "wouter";
 import { Plus, Minus, LogOut, Utensils, HeartPulse, User, Loader2, Footprints, Droplet, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { getProgressColorClass, cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth-context";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { Timer } from "lucide-react";
 import { motion } from "framer-motion";
 import { RecordHealthDrawer } from "@/components/record-health-drawer";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +33,7 @@ function MiniProgressRing({
   const gradientId = `grad-${label.replace(/\s+/g, '')}`;
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="flex flex-col items-center gap-1">
       <div className="relative flex flex-col items-center justify-center" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="rotate-[-90deg]">
           <defs>
@@ -55,15 +56,18 @@ function MiniProgressRing({
             style={{ strokeDasharray: circumference }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[13px] font-bold tracking-tight text-foreground">
+        <div className="absolute inset-0 flex flex-col items-center justify-center mt-0.5">
+          <span className="text-[13px] font-bold tracking-tight text-foreground leading-none">
             {showPercent ? `${Math.round(pct * 100)}%` : Math.round(value)}
             {!showPercent && unit && <span className="text-[9px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
           </span>
-          <span className="text-[7px] text-muted-foreground">{showPercent ? "" : label.toLowerCase()}</span>
+          <span className="text-[7px] text-muted-foreground mt-1 leading-none">{showPercent ? "" : label.toLowerCase()}</span>
         </div>
       </div>
-      <span className="text-[10px] font-semibold text-foreground tracking-wide">{label}</span>
+      <div className="flex flex-col items-center mt-1 text-center">
+        <span className="text-[10px] font-semibold text-foreground tracking-wide leading-none mb-1">{label}</span>
+        <span className="text-[8px] font-medium text-muted-foreground leading-none">{Math.round(value)} / {Math.round(max)}{unit}</span>
+      </div>
     </div>
   );
 }
@@ -89,6 +93,65 @@ function MacroPill({ label, value, max, colorClass, unit = "g" }: any) {
   );
 }
 
+// -- Fasting Tracker Component ----------------------------------------------
+function FastingTrackerCard({ lastMealLog, now, targetHours }: { lastMealLog: any, now: number, targetHours: number }) {
+  if (!lastMealLog || !lastMealLog.logged_at) return null;
+  
+  const lastMealTime = new Date(lastMealLog.logged_at).getTime();
+  const elapsedMs = Math.max(0, now - lastMealTime);
+  const elapsedHours = Math.floor(elapsedMs / (1000 * 60 * 60));
+  const elapsedMinutes = Math.floor((elapsedMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  const targetMs = targetHours * 60 * 60 * 1000;
+  const pct = Math.min((elapsedMs / targetMs) * 100, 100);
+  const isGoalReached = pct >= 100;
+
+  return (
+    <section className="bg-card border shadow-sm rounded-xl p-3.5">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <div className="p-1 rounded-md bg-indigo-500/10">
+            <Timer className="w-3.5 h-3.5 text-indigo-500" />
+          </div>
+          <h2 className="text-[11px] font-bold text-foreground uppercase tracking-wide">Fasting Tracker</h2>
+        </div>
+        <span className="text-[9px] font-medium text-muted-foreground">
+          {targetHours}h Goal
+        </span>
+      </div>
+
+      <div className="flex justify-between items-end mb-1.5 mt-1">
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-0.5 leading-none">
+            <span className="text-3xl font-light tracking-tight text-indigo-500">{elapsedHours}</span>
+            <span className="text-[10px] font-medium text-muted-foreground mr-1.5">h</span>
+            <span className="text-3xl font-light tracking-tight text-indigo-500">{elapsedMinutes}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">m</span>
+          </div>
+        </div>
+        <div className="text-right flex flex-col justify-end">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+            {isGoalReached ? "Goal Reached 🎉" : "Current Fast"}
+          </span>
+        </div>
+      </div>
+
+      <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden mt-2">
+        <motion.div
+          className={`h-full rounded-full ${isGoalReached ? "bg-green-500" : "bg-indigo-500"}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </div>
+      
+      <p className="text-[8.5px] text-muted-foreground mt-2 text-center uppercase tracking-wider">
+        Started: {format(new Date(lastMealTime), "MMM d, h:mm a")}
+      </p>
+    </section>
+  );
+}
+
 export function Dashboard() {
   const { memberId, logout } = useAuth();
   const queryClient = useQueryClient();
@@ -97,6 +160,18 @@ export function Dashboard() {
   const { data: daily } = useGetDailySummary(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetDailySummaryQueryKey(memberId!, { date: TODAY }) } });
   const { data: logs } = useGetConsumptionLogs(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetConsumptionLogsQueryKey(memberId!, { date: TODAY }) } });
   const { data: activities, refetch: refetchActivities } = useGetActivities(memberId!, { date: TODAY }, { query: { enabled: !!memberId, queryKey: getGetActivitiesQueryKey(memberId!, { date: TODAY }) } });
+
+  const { data: latestFoodLog } = useQuery({
+    queryKey: ['latestFoodLog', memberId],
+    queryFn: () => apiFetch(`/members/${memberId}/consumption`).then(res => res.json()).then(data => data[0]),
+    enabled: !!memberId,
+  });
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
   const [waterLogs, setWaterLogs] = useState<any[]>([]);
@@ -205,13 +280,13 @@ export function Dashboard() {
 
       <main className="px-4 pt-4 flex flex-col gap-3">
         
-        {/* Calorie Intake 4-Ring Card */}
+        {/* Daily Nutrition Tracking 4-Ring Card */}
         <section className="bg-card border shadow-sm rounded-xl p-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-1.5 rounded-lg bg-mint-base/20">
               <Utensils className="w-4 h-4 text-mint-dark" />
             </div>
-            <h2 className="text-sm font-bold text-foreground">Calorie Intake</h2>
+            <h2 className="text-sm font-bold text-foreground">Daily Nutrition Tracking</h2>
           </div>
           
           <div className="flex justify-between items-end pb-2">
@@ -219,6 +294,7 @@ export function Dashboard() {
               value={macros.total_kcal} 
               max={adjustedTarget} 
               label="Calories" 
+              unit="kcal"
               colorStops={["#facc15", "#ea580c"]} // Yellow to Orange
             />
             <MiniProgressRing 
@@ -232,6 +308,7 @@ export function Dashboard() {
               value={macros.total_fiber_g ?? 0} 
               max={member?.target_fiber_g || 30} 
               label="Fiber" 
+              unit="g"
               showPercent={true}
               colorStops={["#4ade80", "#16a34a"]} // Light green to Dark green
             />
@@ -239,6 +316,7 @@ export function Dashboard() {
               value={totalWater} 
               max={member?.target_water_ml || 2500} 
               label="Water" 
+              unit="ml"
               showPercent={true}
               colorStops={["#60a5fa", "#2563eb"]} // Light blue to blue
             />
@@ -249,6 +327,13 @@ export function Dashboard() {
             <div className="w-1 h-1 rounded-full bg-muted"></div>
           </div>
         </section>
+
+        {/* Fasting Tracker Card */}
+        <FastingTrackerCard 
+          lastMealLog={latestFoodLog} 
+          now={now} 
+          targetHours={member?.target_fasting_hours || 16} 
+        />
 
         {/* Calories Burnt Today Card */}
         <section className="bg-card border shadow-sm rounded-xl p-3 flex items-center justify-between relative overflow-hidden">

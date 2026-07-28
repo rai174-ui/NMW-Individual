@@ -154,6 +154,10 @@ export function Profile() {
             <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Water</span>
             <span className="text-base font-bold">{member?.target_water_ml || "--"} <span className="text-xs font-normal text-muted-foreground">ml</span></span>
           </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Fasting</span>
+            <span className="text-base font-bold">{member?.target_fasting_hours || "--"} <span className="text-xs font-normal text-muted-foreground">h</span></span>
+          </div>
         </div>
       </section>
 
