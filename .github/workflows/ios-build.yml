@@ -86,7 +86,7 @@ jobs:
       - name: Build and Archive iOS App (.xcarchive)
         working-directory: artifacts/nutrimyway/ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace \
+          xcodebuild -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -archivePath $RUNNER_TEMP/App.xcarchive \
