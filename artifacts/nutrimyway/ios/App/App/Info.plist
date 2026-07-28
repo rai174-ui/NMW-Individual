@@ -47,5 +47,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>HealthLogix needs access to your camera to take photos of your meals and health documents.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>HealthLogix needs access to save photos to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>HealthLogix needs access to your photo library to upload pictures of your meals and health documents.</string>
 </dict>
 </plist>
