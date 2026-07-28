@@ -25,10 +25,8 @@ jobs:
         with:
           version: 9
 
-      - name: Install dependencies
-        run: |
-          pnpm config set node-linker hoisted
-          pnpm install
+      - name: Install workspace dependencies
+        run: pnpm install --shamefully-hoist
 
       - name: Build Web App
         working-directory: artifacts/nutrimyway
@@ -36,11 +34,7 @@ jobs:
 
       - name: Sync Capacitor (iOS)
         working-directory: artifacts/nutrimyway
-        run: |
-          mkdir -p node_modules
-          cp -r ${{ github.workspace }}/node_modules/@capacitor node_modules/
-          cp -r ${{ github.workspace }}/node_modules/@capacitor-mlkit node_modules/
-          npx cap sync ios
+        run: npx cap sync ios
 
       - name: Install Apple Certificate and Provisioning Profile
         env:
