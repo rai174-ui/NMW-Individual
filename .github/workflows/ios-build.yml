@@ -26,7 +26,6 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        working-directory: artifacts/nutrimyway
         run: pnpm install
 
       - name: Build Web App
