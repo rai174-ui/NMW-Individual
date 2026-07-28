@@ -34,7 +34,11 @@ jobs:
 
       - name: Sync Capacitor (iOS)
         working-directory: artifacts/nutrimyway
-        run: npx cap sync ios
+        run: |
+          mkdir -p node_modules/@capacitor
+          ln -s ${{ github.workspace }}/node_modules/@capacitor/ios node_modules/@capacitor/ios
+          ln -s ${{ github.workspace }}/node_modules/@capacitor/core node_modules/@capacitor/core
+          npx cap sync ios
 
       - name: Install Apple Certificate and Provisioning Profile
         env:
