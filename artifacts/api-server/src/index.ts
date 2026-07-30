@@ -1,4 +1,4 @@
-import app, { startBroadcastScheduler, startPhotoCleanupScheduler } from "./app";
+import app, { startPhotoCleanupScheduler } from "./app";
 import { logger } from "./lib/logger";
 import { initDb } from "./lib/sqlite";
 import { setDbReady } from "./routes/health";
@@ -46,7 +46,6 @@ const server = app.listen(port, () => {
 initDb()
   .then(() => {
     setDbReady(true);
-    startBroadcastScheduler();
     startPhotoCleanupScheduler();
     logger.info("Database initialized, schedulers started");
   })

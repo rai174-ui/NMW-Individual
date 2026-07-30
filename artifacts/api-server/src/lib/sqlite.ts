@@ -132,7 +132,8 @@ async function createTables(): Promise<void> {
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS push_token TEXT;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS current_weight_kg REAL;`,
     `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS ethnicity TEXT;`,
-    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fasting_hours REAL DEFAULT 16;`
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS target_fasting_hours REAL DEFAULT 16;`,
+    `ALTER TABLE public.members ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;`
   ];
 
   for (const query of migrations) {

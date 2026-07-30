@@ -8,8 +8,8 @@ import { logger } from "./lib/logger";
 import { pool } from "./lib/sqlite";
 import { ObjectStorageService } from "./lib/objectStorage";
 import { ObjectNotFoundError } from "./lib/objectStorage";
-import { sendPushNotification } from "./lib/push";
 import { initAiTipsJob } from "./jobs/ai-tips";
+
 
 const app: Express = express();
 
@@ -124,92 +124,6 @@ if (existsSync(bundledPublicDir)) {
   logger.info({ bundledPublicDir }, "Serving main frontend static files");
 }
 
-// ── Scheduled broadcast runner ────────────────────────────────────────────
-
-/** Check every minute and send any broadcast schedules whose time has arrived today. */
-export function startBroadcastScheduler(): void {
-  async function tick() {
-    try {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "Asia/Kolkata",
-      });
-      const todayStart = new Date(now);
-      todayStart.setHours(0, 0, 0, 0);
-      const { rows: schedules } = await pool.query(
-        `SELECT id, center_id, message, schedule_time, last_sent_at
-         FROM center_broadcast_schedules
-         WHERE is_active = TRUE
-           AND schedule_time <= $1
-           AND (last_sent_at IS NULL OR last_sent_at < $2)`,
-        [timeStr, todayStart.toISOString()],
-      );
-      for (const s of schedules as Array<{
-        id: number;
-        center_id: string;
-        message: string;
-      }>) {
-        await pool.query("BEGIN");
-        try {
-          // Double-check inside transaction to avoid duplicate sends on race
-          const { rows: fresh } = await pool.query(
-            `SELECT last_sent_at FROM center_broadcast_schedules WHERE id = $1 FOR UPDATE`,
-            [s.id],
-          );
-          const last = (fresh[0] as { last_sent_at: string | null })
-            .last_sent_at;
-          if (last && new Date(last) >= todayStart) {
-            await pool.query("ROLLBACK");
-            continue;
-          }
-          // Insert broadcast
-          await pool.query(
-            `INSERT INTO member_broadcasts (center_id, message, sent_at, sent_by)
-             VALUES ($1, $2, NOW(), 'scheduled')`,
-            [s.center_id, s.message],
-          );
-          // Mark schedule as sent today
-          await pool.query(
-            `UPDATE center_broadcast_schedules SET last_sent_at = NOW() WHERE id = $1`,
-            [s.id],
-          );
-          await pool.query("COMMIT");
-          logger.info(
-            { scheduleId: s.id, centerId: s.center_id, time: timeStr },
-            "Scheduled broadcast sent",
-          );
-
-          // Send push notification asynchronously
-          pool.query(
-            `SELECT push_token FROM members m
-             JOIN member_center_mapping mcm ON mcm.member_id = m.id
-             WHERE mcm.center_id = $1 AND m.is_active = TRUE AND m.push_token IS NOT NULL`,
-            [s.center_id]
-          ).then(res => {
-            const tokens = res.rows.map(r => r.push_token as string);
-            if (tokens.length > 0) {
-              sendPushNotification(tokens, "Scheduled Broadcast", s.message).catch(err => {
-                logger.error({ err }, "Failed to send scheduled broadcast push notifications");
-              });
-            }
-          }).catch(err => logger.error({ err }, "Failed to query push tokens for scheduled broadcast"));
-        } catch (err) {
-          await pool.query("ROLLBACK");
-          logger.error({ err, scheduleId: s.id }, "Scheduled broadcast failed");
-        }
-      }
-    } catch (err) {
-      logger.error({ err }, "Broadcast scheduler tick failed");
-    }
-  }
-
-  // Run immediately on startup, then every 60s
-  tick();
-  setInterval(tick, 60_000);
-  logger.info("Broadcast scheduler started (checking every 60s)");
-}
 
 // ── Photo cleanup scheduler ─────────────────────────────────────────────
 
