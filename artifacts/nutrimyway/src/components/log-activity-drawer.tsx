@@ -56,8 +56,8 @@ export function LogActivityDrawer({ open, onOpenChange, onSuccess }: LogActivity
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="px-4">
-        <DrawerHeader className="px-0 pt-6">
+      <DrawerContent className="flex flex-col" style={{ maxHeight: '90vh' }}>
+        <DrawerHeader className="px-4 pt-6 flex-shrink-0">
           <DrawerTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
             Log Activity
@@ -65,7 +65,8 @@ export function LogActivityDrawer({ open, onOpenChange, onSuccess }: LogActivity
           <DrawerDescription>Add a physical activity manually.</DrawerDescription>
         </DrawerHeader>
 
-        <div className="space-y-4 py-4">
+        {/* Scrollable body — keeps inputs visible when keyboard opens */}
+        <div className="overflow-y-auto flex-1 px-4">
           <div>
             <label className="text-sm font-medium mb-2 block">Activity Type</label>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -112,9 +113,9 @@ export function LogActivityDrawer({ open, onOpenChange, onSuccess }: LogActivity
               />
             </div>
           </div>
-        </div>
+        </div>{/* end scrollable body */}
 
-        <DrawerFooter className="px-0 pb-8">
+        <DrawerFooter className="px-4 pb-8 flex-shrink-0">
           <Button onClick={handleSave} disabled={loading} className="w-full h-12 rounded-xl text-base font-medium">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Activity"}
           </Button>

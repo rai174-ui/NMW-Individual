@@ -61,8 +61,8 @@ export function RecordHealthDrawer({ open, onOpenChange, existingRecord, onSucce
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md pb-6 px-4">
-          <DrawerHeader className="px-0 pt-4 text-left">
+        <div className="mx-auto w-full max-w-md flex flex-col" style={{ maxHeight: '90vh' }}>
+          <DrawerHeader className="px-4 pt-4 text-left flex-shrink-0">
             <DrawerTitle className="text-xl flex items-center gap-2">
               <Scale className="w-5 h-5 text-primary" />
               {existingRecord ? "Edit Today's Health" : "Record My Health"}
@@ -71,8 +71,9 @@ export function RecordHealthDrawer({ open, onOpenChange, existingRecord, onSucce
               Track your body weight and body fat percentage.
             </DrawerDescription>
           </DrawerHeader>
-          
-          <div className="space-y-4 pt-2">
+
+          {/* Scrollable body — keeps inputs visible when keyboard opens */}
+          <div className="overflow-y-auto flex-1 px-4 pb-8">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Weight (kg) *</label>
               <input
@@ -108,8 +109,9 @@ export function RecordHealthDrawer({ open, onOpenChange, existingRecord, onSucce
               />
             </div>
           </div>
+          {/* end scrollable body */}
 
-          <DrawerFooter className="px-0 pt-6">
+          <DrawerFooter className="px-4 pt-4 pb-6 flex-shrink-0">
             <Button onClick={handleSave} disabled={loading || !weight} className="h-12 text-base font-semibold rounded-xl">
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save"}
             </Button>

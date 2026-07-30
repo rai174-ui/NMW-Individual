@@ -131,9 +131,9 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md pb-6 px-4">
+        <div className="mx-auto w-full max-w-md flex flex-col" style={{ maxHeight: '90vh' }}>
 
-          <DrawerHeader className="px-0 pt-4 text-left">
+          <DrawerHeader className="px-4 pt-4 text-left flex-shrink-0">
             <div className="flex justify-between items-center">
               <DrawerTitle className="text-xl flex items-center gap-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -151,8 +151,9 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
               Set your personal nutrition and hydration goals.
             </DrawerDescription>
           </DrawerHeader>
-          
-          <div className="space-y-4 pt-2">
+
+          {/* Scrollable body — keeps inputs visible when keyboard opens */}
+          <div className="overflow-y-auto flex-1 px-4 pb-8">
             {showAiForm && (
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-4">
                 <h3 className="text-sm font-bold flex items-center gap-2 mb-3">
@@ -251,8 +252,9 @@ export function TargetsDrawer({ open, onOpenChange, member, onSuccess }: Targets
               </div>
             </div>
           </div>
+          {/* end scrollable body */}
 
-          <DrawerFooter className="px-0 pt-6">
+          <DrawerFooter className="px-4 pt-4 pb-6 flex-shrink-0">
             <Button onClick={handleSave} disabled={loading} className="h-12 text-base font-semibold rounded-xl">
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Targets"}
             </Button>
