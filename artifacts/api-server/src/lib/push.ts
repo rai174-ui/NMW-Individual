@@ -35,20 +35,25 @@ function tryInitFirebase(): void {
     return;
   }
 
-  const serviceAccountPath = path.join(process.cwd(), "service-account.json");
+  const possiblePaths = [
+    path.join(process.cwd(), "service-account.json"),
+    path.join(process.cwd(), "artifacts", "api-server", "service-account.json"),
+  ];
 
-  if (fs.existsSync(serviceAccountPath)) {
-    try {
-      const raw = fs.readFileSync(serviceAccountPath, "utf8");
-      const serviceAccount = parseServiceAccount(raw);
-      initializeApp({ credential: cert(serviceAccount) });
-      firebaseInitialized = true;
-      logger.info("Firebase Admin SDK initialized from service-account.json");
-      return;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      firebaseInitError = `service-account.json: ${msg}`;
-      logger.error({ err }, "Failed to initialize Firebase from service-account.json");
+  for (const serviceAccountPath of possiblePaths) {
+    if (fs.existsSync(serviceAccountPath)) {
+      try {
+        const raw = fs.readFileSync(serviceAccountPath, "utf8");
+        const serviceAccount = parseServiceAccount(raw);
+        initializeApp({ credential: cert(serviceAccount) });
+        firebaseInitialized = true;
+        logger.info(`Firebase Admin SDK initialized from ${serviceAccountPath}`);
+        return;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        firebaseInitError = `${serviceAccountPath}: ${msg}`;
+        logger.error({ err }, `Failed to initialize Firebase from ${serviceAccountPath}`);
+      }
     }
   }
 
