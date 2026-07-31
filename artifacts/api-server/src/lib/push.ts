@@ -104,7 +104,7 @@ export function getFirebaseInitError(): string {
 export async function sendPushNotification(tokens: string[], title: string, body: string, imageUrl?: string): Promise<void> {
   if (tokens.length === 0) return;
   if (!firebaseInitialized) {
-    logger.warn("Firebase not initialized; skipping push notification");
+    logger.warn({ reason: firebaseInitError }, "Firebase not initialized; skipping push notification");
     return;
   }
 
