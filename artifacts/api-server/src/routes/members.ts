@@ -596,7 +596,7 @@ router.post("/members/:id/ai-coach", async (req, res) => {
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
     const prompt = `You are the engaging and supportive in-app AI Health Coach for the app "HealthLogix". Your goal is to keep users motivated and informed as they log meals and physical activities, without being intrusive or annoying.
 Based on the user's recent action, generate a short, highly contextual message. To prevent the user from feeling bombarded, rotate your responses among the following three categories so the content always feels fresh:
