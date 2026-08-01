@@ -111,8 +111,8 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-md pb-6 px-4">
-          <DrawerHeader className="px-0 pt-4 text-left">
+        <div className="mx-auto w-full max-w-md flex flex-col" style={{ maxHeight: '90vh' }}>
+          <DrawerHeader className="px-4 pt-4 text-left flex-shrink-0">
             <DrawerTitle className="text-xl flex items-center gap-2">
               <User className="w-5 h-5 text-primary" />
               Edit Profile
@@ -121,7 +121,9 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
               Update your personal details.
             </DrawerDescription>
           </DrawerHeader>
-          
+
+          {/* Scrollable body — ensures active input stays visible when keyboard opens */}
+          <div className="overflow-y-auto flex-1 px-4 pb-8">
           <div className="space-y-4 pt-2">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Full Name</label>
@@ -230,8 +232,9 @@ export function ProfileDrawer({ open, onOpenChange, member, onSuccess }: Profile
               </div>
             </div>
           </div>
+          </div>{/* end scrollable body */}
 
-          <DrawerFooter className="px-0 pt-6">
+          <DrawerFooter className="px-4 pt-4 pb-6 flex-shrink-0">
             <Button onClick={handleSave} disabled={loading || !name} className="h-12 text-base font-semibold rounded-xl">
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Profile"}
             </Button>

@@ -265,7 +265,7 @@ export function Log() {
               <ChevronLeft className="w-5 h-5" />
             </button>
           </Link>
-          <h1 className="text-lg font-bold">Log Meal</h1>
+          <h1 className="text-xl font-bold">Log Meal</h1>
         </div>
         <div className="w-10"></div> {/* Empty space to center the title */}
         <input 
@@ -281,7 +281,7 @@ export function Log() {
         <div className="space-y-4">
           {/* Meal Slot Picker */}
         <section>
-          <h2 className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">When did you eat?</h2>
+          <h2 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">When did you eat?</h2>
           <div className="grid grid-cols-4 gap-2">
             {slots.map((s) => (
               <button
@@ -294,7 +294,7 @@ export function Log() {
                 }`}
               >
                 <s.icon className="w-4 h-4 mb-1" />
-                <span className="text-[10px] font-medium">{s.id}</span>
+                <span className="text-xs font-medium">{s.id}</span>
               </button>
             ))}
           </div>
@@ -303,7 +303,7 @@ export function Log() {
         {/* Manual Entry */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Custom Entry</h2>
+            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">Custom Entry</h2>
             <button 
               onClick={handleCameraClick}
               disabled={aiLoading}
@@ -339,10 +339,10 @@ export function Log() {
             {showDropdown && foodItem.length >= 2 && (
               <div className="absolute z-50 left-3 right-3 top-[56px] max-h-52 overflow-y-auto bg-card text-foreground rounded-lg border shadow-lg overflow-hidden flex flex-col">
                 <div className="sticky top-0 bg-card border-b flex justify-between items-center px-3 py-2 z-10">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Results</span>
+                  <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Results</span>
                   <button 
                     onClick={() => setShowDropdown(false)}
-                    className="text-[10px] bg-muted px-2 py-1 rounded hover:bg-muted/80 font-medium"
+                    className="text-xs bg-muted px-2 py-1 rounded hover:bg-muted/80 font-medium"
                   >
                     Close
                   </button>
@@ -367,7 +367,7 @@ export function Log() {
                         }}
                       >
                         <div className="font-medium">{meal.food_item}</div>
-                        <div className="text-[10px] text-muted-foreground">{meal.calories_kcal} kcal • {meal.protein_g}g protein</div>
+                        <div className="text-xs text-muted-foreground">{meal.calories_kcal} kcal • {meal.protein_g}g protein</div>
                       </button>
                     ))}
                   </>
@@ -420,7 +420,7 @@ export function Log() {
 
             <div className="flex gap-2">
               <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
-                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Calorie</span>
+                <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Calorie</span>
                 <div className="relative mt-auto">
                   <input
                     type="number"
@@ -429,12 +429,12 @@ export function Log() {
                     onChange={(e) => setCustomKcal(e.target.value)}
                     className="w-full bg-transparent outline-none font-medium text-sm text-right pr-5"
                   />
-                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">kcal</span>
+                  <span className="absolute right-0 bottom-0 text-[10px] text-muted-foreground leading-none mb-0.5">kcal</span>
                 </div>
               </div>
               
               <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
-                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Protein</span>
+                <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Protein</span>
                 <div className="relative mt-auto">
                   <input
                     type="number"
@@ -443,12 +443,12 @@ export function Log() {
                     onChange={(e) => setCustomProtein(e.target.value)}
                     className="w-full bg-transparent outline-none font-medium text-sm text-right pr-3"
                   />
-                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">g</span>
+                  <span className="absolute right-0 bottom-0 text-[10px] text-muted-foreground leading-none mb-0.5">g</span>
                 </div>
               </div>
 
               <div className="relative flex-1 bg-card border rounded-lg p-2 flex flex-col justify-between h-14">
-                <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Fiber</span>
+                <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-none">Fiber</span>
                 <div className="relative mt-auto">
                   <input
                     type="number"
@@ -457,7 +457,7 @@ export function Log() {
                     onChange={(e) => setCustomFiber(e.target.value)}
                     className="w-full bg-transparent outline-none font-medium text-sm text-right pr-3"
                   />
-                  <span className="absolute right-0 bottom-0 text-[9px] text-muted-foreground leading-none mb-0.5">g</span>
+                  <span className="absolute right-0 bottom-0 text-[10px] text-muted-foreground leading-none mb-0.5">g</span>
                 </div>
               </div>
             </div>
@@ -501,7 +501,7 @@ export function Log() {
 
         {/* Today's Logged Meals (Collapsible by Category) */}
         <section className="pt-4">
-          <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Today's Logs</h2>
+          <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-3">Today's Logs</h2>
           <div className="space-y-2 pb-6">
             {slots.map(s => {
               const slotLogs = Array.isArray(logs) ? logs.filter(l => l.meal_slot.toLowerCase() === s.id.toLowerCase()) : [];
@@ -517,7 +517,7 @@ export function Log() {
                     <div className="flex items-center gap-2">
                       <s.icon className="w-4 h-4 text-primary" />
                       <span className="font-bold text-sm text-foreground">{s.id}</span>
-                      <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                         {slotLogs.length} {slotLogs.length === 1 ? 'item' : 'items'}
                       </span>
                     </div>
@@ -536,12 +536,12 @@ export function Log() {
                           {slotLogs.map(log => (
                             <div key={log.id} className="bg-background border rounded-lg p-2.5 flex justify-between items-center">
                               <div className="flex-1 min-w-0 pr-2">
-                                <p className="font-bold text-foreground text-xs truncate">{log.food_item}</p>
-                                <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
+                                <p className="font-bold text-foreground text-sm truncate">{log.food_item}</p>
+                                <div className="flex gap-2 mt-0.5 text-xs text-muted-foreground">
                                   {log.calories_kcal != null && <span>{log.calories_kcal} kcal</span>}
                                   {log.protein_g != null && <span>{log.protein_g}g protein</span>}
                                 </div>
-                                <div className="text-[9px] text-muted-foreground/60 mt-0.5">{safeFormat(log.logged_at, "h:mm a")}</div>
+                                <div className="text-[10px] text-muted-foreground/60 mt-0.5">{safeFormat(log.logged_at, "h:mm a")}</div>
                               </div>
                               <button 
                                 onClick={() => handleDelete(log.id)}

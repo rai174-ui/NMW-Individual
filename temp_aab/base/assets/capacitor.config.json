@@ -1,0 +1,16 @@
+{
+	"appId": "in.healthlogix.app",
+	"appName": "HealthLogix",
+	"webDir": "dist/public",
+	"server": {},
+	"android": {},
+	"plugins": {
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	}
+}

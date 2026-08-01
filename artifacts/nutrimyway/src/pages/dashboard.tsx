@@ -57,16 +57,16 @@ function MiniProgressRing({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center mt-0.5">
-          <span className="text-[13px] font-bold tracking-tight text-foreground leading-none">
+          <span className="text-sm font-bold tracking-tight text-foreground leading-none">
             {showPercent ? `${Math.round(pct * 100)}%` : Math.round(value)}
-            {!showPercent && unit && <span className="text-[9px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
+            {!showPercent && unit && <span className="text-[10px] font-normal text-muted-foreground ml-0.5">{unit}</span>}
           </span>
-          <span className="text-[7px] text-muted-foreground mt-1 leading-none">{showPercent ? "" : label.toLowerCase()}</span>
+          <span className="text-[9px] text-muted-foreground mt-1 leading-none">{showPercent ? "" : label.toLowerCase()}</span>
         </div>
       </div>
       <div className="flex flex-col items-center mt-1 text-center">
-        <span className="text-[10px] font-semibold text-foreground tracking-wide leading-none mb-1">{label}</span>
-        <span className="text-[8px] font-medium text-muted-foreground leading-none">{Math.round(value)} / {Math.round(max)}{unit}</span>
+        <span className="text-xs font-semibold text-foreground tracking-wide leading-none mb-1">{label}</span>
+        <span className="text-[10px] font-medium text-muted-foreground leading-none">{Math.round(value)} / {Math.round(max)}{unit}</span>
       </div>
     </div>
   );
@@ -113,9 +113,9 @@ function FastingTrackerCard({ lastMealLog, now, targetHours }: { lastMealLog: an
           <div className="p-1 rounded-md bg-indigo-500/10">
             <Timer className="w-3.5 h-3.5 text-indigo-500" />
           </div>
-          <h2 className="text-[11px] font-bold text-foreground uppercase tracking-wide">Fasting Tracker</h2>
+          <h2 className="text-xs font-bold text-foreground uppercase tracking-wide">Fasting Tracker</h2>
         </div>
-        <span className="text-[9px] font-medium text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           {targetHours}h Goal
         </span>
       </div>
@@ -124,13 +124,13 @@ function FastingTrackerCard({ lastMealLog, now, targetHours }: { lastMealLog: an
         <div className="flex flex-col">
           <div className="flex items-baseline gap-0.5 leading-none">
             <span className="text-3xl font-light tracking-tight text-indigo-500">{elapsedHours}</span>
-            <span className="text-[10px] font-medium text-muted-foreground mr-1.5">h</span>
+            <span className="text-xs font-medium text-muted-foreground mr-1.5">h</span>
             <span className="text-3xl font-light tracking-tight text-indigo-500">{elapsedMinutes}</span>
-            <span className="text-[10px] font-medium text-muted-foreground">m</span>
+            <span className="text-xs font-medium text-muted-foreground">m</span>
           </div>
         </div>
         <div className="text-right flex flex-col justify-end">
-          <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+          <span className="text-xs text-muted-foreground uppercase tracking-wider">
             {isGoalReached ? "Goal Reached 🎉" : "Current Fast"}
           </span>
         </div>
@@ -145,7 +145,7 @@ function FastingTrackerCard({ lastMealLog, now, targetHours }: { lastMealLog: an
         />
       </div>
       
-      <p className="text-[8.5px] text-muted-foreground mt-2 text-center uppercase tracking-wider">
+      <p className="text-[10px] text-muted-foreground mt-2 text-center uppercase tracking-wider">
         Started: {format(new Date(lastMealTime), "MMM d, h:mm a")}
       </p>
     </section>
@@ -262,10 +262,10 @@ export function Dashboard() {
       <header className="bg-card px-4 pt-8 pb-4 rounded-b-3xl shadow-sm border-b relative z-10">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-medium text-muted-foreground mb-1 uppercase tracking-wider">
+            <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">
               {format(new Date(), "EEEE, MMMM do")}
             </p>
-            <h1 className="text-lg font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Hi, {member?.name?.split(" ")[0] || "Guest"}
             </h1>
           </div>
@@ -286,7 +286,7 @@ export function Dashboard() {
             <div className="p-1.5 rounded-lg bg-mint-base/20">
               <Utensils className="w-4 h-4 text-mint-dark" />
             </div>
-            <h2 className="text-sm font-bold text-foreground">Daily Nutrition Tracking</h2>
+            <h2 className="text-base font-bold text-foreground">Daily Nutrition Tracking</h2>
           </div>
           
           <div className="flex justify-between items-end pb-2">
@@ -343,11 +343,11 @@ export function Dashboard() {
             </div>
             <div>
               <h3 className="font-bold text-foreground text-sm">Calories Burnt Today</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">From physical activities</p>
+              <p className="text-xs text-muted-foreground mt-0.5">From physical activities</p>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-lg font-black text-orange-500">{burned} <span className="text-[10px] font-bold opacity-80 uppercase">kcal</span></span>
+            <span className="text-xl font-black text-orange-500">{burned} <span className="text-xs font-bold opacity-80 uppercase">kcal</span></span>
           </div>
         </section>
 
@@ -358,8 +358,8 @@ export function Dashboard() {
               <Droplet className="w-4 h-4 text-cyan-dark fill-cyan-base/50" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground text-xs">Log Water</h3>
-              <p className="text-[10px] text-muted-foreground">+250ml per glass</p>
+              <h3 className="font-bold text-foreground text-sm">Log Water</h3>
+              <p className="text-xs text-muted-foreground">+250ml per glass</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -373,7 +373,7 @@ export function Dashboard() {
             <button
               onClick={() => handleAddWater(250)}
               disabled={addingWater}
-              className="px-3 py-1.5 bg-cyan-base text-white rounded-full text-[10px] uppercase tracking-wider font-bold flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-50 min-w-[70px] justify-center"
+              className="px-3 py-1.5 bg-cyan-base text-white rounded-full text-xs uppercase tracking-wider font-bold flex items-center gap-1 active:scale-95 transition-transform disabled:opacity-50 min-w-[70px] justify-center"
             >
               {addingWater ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -392,17 +392,17 @@ export function Dashboard() {
               <HeartPulse className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground text-xs">Today's Weight</h3>
+              <h3 className="font-bold text-foreground text-sm">Today's Weight</h3>
               {todayRecord ? (
-                <p className="text-[10px] text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat %'}</p>
+                <p className="text-xs text-muted-foreground">{todayRecord.weight_kg} kg • {todayRecord.body_fat_pct ? `${todayRecord.body_fat_pct}% fat` : 'No fat %'}</p>
               ) : (
-                <p className="text-[10px] text-muted-foreground">Not logged yet</p>
+                <p className="text-xs text-muted-foreground">Not logged yet</p>
               )}
             </div>
           </div>
           <button 
             onClick={() => setDrawerOpen(true)}
-            className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-[10px] uppercase tracking-wider font-bold rounded-full transition-colors"
+            className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-xs uppercase tracking-wider font-bold rounded-full transition-colors"
           >
             {todayRecord ? "Edit" : "Log Now"}
           </button>
@@ -415,7 +415,7 @@ export function Dashboard() {
               onClick={() => setMealsExpanded(!mealsExpanded)}
               className="flex items-center gap-2 flex-1 outline-none"
             >
-              <h3 className="font-bold text-foreground flex items-center gap-1 text-xs">
+              <h3 className="font-bold text-foreground flex items-center gap-1 text-sm">
                 <Utensils className="w-3.5 h-3.5 text-primary" />
                 TODAY'S MEALS
               </h3>
@@ -441,18 +441,18 @@ export function Dashboard() {
                 const items = Array.isArray(logs) ? logs.filter(l => l.meal_slot.toLowerCase() === slot) : [];
                 return (
                   <div key={slot} className="border-t pt-2 first:border-0 first:pt-0">
-                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{slot}</h4>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{slot}</h4>
                     {items.length > 0 ? (
                       <div className="space-y-1">
                         {items.map(item => (
-                          <div key={item.id} className="flex justify-between items-center text-xs">
+                          <div key={item.id} className="flex justify-between items-center text-sm">
                             <span className="text-foreground font-medium">{item.food_item}</span>
                             <span className="text-muted-foreground">{item.calories_kcal} kcal</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-[9px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-4">Nothing Logged</div>
+                      <div className="text-[10px] font-bold text-muted-foreground/60 uppercase text-right tracking-widest -mt-4">Nothing Logged</div>
                     )}
                   </div>
                 );
